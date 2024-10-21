@@ -11,7 +11,7 @@ import java.util.List;
 
 public class Limelight {
 
-    public Limelight3A limelight;
+    private Limelight3A limelight;
 
     public enum AllianceColor {
         RED,
@@ -54,7 +54,7 @@ public class Limelight {
         
         Pose llPose = new Pose(x, y);
 
-        return fromLimelightPose(llPose, alliance)
+        return fromLimelightPose(llPose, alliance);
     }
 
     public Pose getLimelightPose() {
@@ -65,6 +65,8 @@ public class Limelight {
         llPose.add(new Pose(72, 72));
         double x = llPose.getY();
         double y = -llPose.getX();
+
+        return new Pose();
     }
     
     public Pose fromLimelightPose(Pose llPose) {
