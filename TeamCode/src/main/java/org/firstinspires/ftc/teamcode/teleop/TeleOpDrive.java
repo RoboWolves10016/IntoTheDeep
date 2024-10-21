@@ -5,17 +5,24 @@ import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstan
 import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants.rightFrontMotorName;
 import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants.rightRearMotorName;
 
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import org.firstinspires.ftc.teamcode.Intake;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.util.DashboardPoseTracker;
 
 @TeleOp(name = "Pedro Pathing TeleOp", group = "Test")
 public class TeleOpDrive extends OpMode {
+
+    private GamepadEx gamepad1;
+    private GamepadEx gamepad2;
     private Follower follower;
+    private Intake flipper;
 
     private DcMotorEx leftFront;
     private DcMotorEx leftRear;
@@ -29,7 +36,11 @@ public class TeleOpDrive extends OpMode {
      */
     @Override
     public void init() {
+        gamepad1 = new GamepadEx(super.gamepad1);
+        gamepad2 = new GamepadEx(super.gamepad2);
+
         follower = new Follower(hardwareMap);
+        flipper = Intake.getInstance(hardwareMap);
 
         leftFront = hardwareMap.get(DcMotorEx.class, leftFrontMotorName);
         leftRear = hardwareMap.get(DcMotorEx.class, leftRearMotorName);
@@ -42,6 +53,8 @@ public class TeleOpDrive extends OpMode {
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         follower.startTeleopDrive();
+
+        configureBindings();
     }
 
     @Override
@@ -51,7 +64,20 @@ public class TeleOpDrive extends OpMode {
         telemetry.addData("Right Encoder Rotation: ", rightRear.getCurrentPosition());
         telemetry.addData("Strafe Encoder Rotation: ", leftRear.getCurrentPosition());
         telemetry.update();
-        follower.setTeleOpMovementVectors(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+        follower.setTeleOpMovementVectors(-gamepad1.getLeftY(), -gamepad1.getLeftX(), -gamepad1.getRightX(), true);
         follower.update();
+
+        if(gamepad2.getButton(GamepadKeys.Button.A)) {
+            flipper.flipIn();
+        }
+
+        if(gamepad2.getButton(GamepadKeys.Button.B)) {
+            flipper.flipIn();
+        }
+    }
+
+    private void configureBindings() {
+        gamepad1.getGamepadButton(GamepadKeys.Button.A)
+                .while
     }
 }
