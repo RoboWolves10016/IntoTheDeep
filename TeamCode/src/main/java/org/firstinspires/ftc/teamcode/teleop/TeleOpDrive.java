@@ -77,7 +77,7 @@ public class TeleOpDrive extends OpMode {
     }
 
     private void configureBindings() {
-        gamepad1.getGamepadButton(GamepadKeys.Button.A)
-                .while
+        gamepad1.getGamepadButton(GamepadKeys.Button.A);
+//                .
     }
 }
