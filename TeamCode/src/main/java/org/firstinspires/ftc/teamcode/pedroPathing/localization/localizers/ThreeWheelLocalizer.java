@@ -56,9 +56,9 @@ public class ThreeWheelLocalizer extends Localizer {
     private Pose rightEncoderPose;
     private Pose strafeEncoderPose;
     private double totalHeading;
-    public static double FORWARD_TICKS_TO_INCHES = -0.0006;//8192 * 1.37795 * 2 * Math.PI * 0.5008239963;
-    public static double STRAFE_TICKS_TO_INCHES = -0.0006;//8192 * 1.37795 * 2 * Math.PI * 0.5018874659;
-    public static double TURN_TICKS_TO_RADIANS = -0.0006;
+    public static double FORWARD_TICKS_TO_INCHES = 0.0010522;//8192 * 1.37795 * 2 * Math.PI * 0.5008239963;
+    public static double STRAFE_TICKS_TO_INCHES = 0.001035;//8192 * 1.37795 * 2 * Math.PI * 0.5018874659;
+    public static double TURN_TICKS_TO_RADIANS = 0.0010509;
 
     /**
      * This creates a new ThreeWheelLocalizer from a HardwareMap, with a starting Pose at (0,0)
@@ -79,9 +79,11 @@ public class ThreeWheelLocalizer extends Localizer {
      */
     public ThreeWheelLocalizer(HardwareMap map, Pose setStartPose) {
         // TODO: replace these with your encoder positions
-        leftEncoderPose = new Pose(1.4375, 4.375, 0);
-        rightEncoderPose = new Pose(0.9375, -4.125, 0);
-        strafeEncoderPose = new Pose(-1.1875, 0, Math.toRadians(90));
+     //   leftEncoderPose = new Pose(-0.118, 3.9335, 0);
+     //   rightEncoderPose = new Pose(-0.118, -3.9335, 0);
+        leftEncoderPose = new Pose(3.118, 3.9335, 0);
+        rightEncoderPose = new Pose(3.118, -3.9335, 0);
+        strafeEncoderPose = new Pose(7.32, 0.1875, Math.toRadians(90));
 
         hardwareMap = map;
 
@@ -92,8 +94,8 @@ public class ThreeWheelLocalizer extends Localizer {
 
         // TODO: reverse any encoders necessary
         leftEncoder.setDirection(Encoder.REVERSE);
-        rightEncoder.setDirection(Encoder.REVERSE);
-        strafeEncoder.setDirection(Encoder.REVERSE);
+        rightEncoder.setDirection(Encoder.FORWARD);
+        strafeEncoder.setDirection(Encoder.FORWARD);
 
         setStartPose(setStartPose);
         timer = new NanoTimer();
