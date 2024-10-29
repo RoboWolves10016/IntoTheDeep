@@ -41,16 +41,7 @@ public class Intake extends SimpleSubsystem {
     private double currentPosition = IN_POSITION;
     private double targetPosition = currentPosition;
 
-    private static Intake instance;
-
-    public static Intake getInstance(HardwareMap hwMap) {
-        if(instance == null) {
-            instance = new Intake(hwMap);
-        }
-        return instance;
-    }
-
-    private Intake(HardwareMap hwMap) {
+    public Intake(HardwareMap hwMap) {
         spinner = hwMap.get(CRServo.class, "spinner");
 
         flipper = hwMap.get(DcMotorEx.class, "flipper");

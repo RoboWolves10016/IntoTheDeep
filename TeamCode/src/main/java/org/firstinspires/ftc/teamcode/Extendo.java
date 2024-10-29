@@ -30,16 +30,7 @@ public class Extendo extends SimpleSubsystem {
     private double currentPosition = 0;
     private double targetPosition = 0;
 
-    private static Extendo instance;
-
-    public static Extendo getInstance(HardwareMap hwMap) {
-        if(instance == null) {
-            instance = new Extendo(hwMap);
-        }
-        return instance;
-    }
-
-    private Extendo(HardwareMap hwMap) {
+    public Extendo(HardwareMap hwMap) {
 
         motor = hwMap.get(DcMotorEx.class, "extendo");
         motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -69,45 +60,6 @@ public class Extendo extends SimpleSubsystem {
 
     public void setTargetPosition(double target) {
         targetPosition = target;
-    }
-
-    public Command extend(Extendo extendo) {
-        return new CommandBase() {
-            @Override
-            public void initialize() {
-                addRequirements(extendo);
-                targetPosition = OUT_POSITION;
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                targetPosition = currentPosition;
-            }
-
-            @Override
-            public boolean isFinished() {
-                return atPosition();
-            }
-        };
-    }
-
-    public Command retract(Extendo extendo) {
-        return new CommandBase() {
-            @Override
-            public void initialize() {
-                targetPosition = IN_POSITION;
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-
-            }
-
-            @Override
-            public boolean isFinished() {
-                return atPosition();
-            }
-        };
     }
 
 }

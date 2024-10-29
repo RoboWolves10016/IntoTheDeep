@@ -37,16 +37,7 @@ public class Lift extends SimpleSubsystem {
     private double rightPosition = 0;
     private double target = 0;
 
-    private static Lift instance;
-
-    public static Lift getInstance(HardwareMap hwMap) {
-        if(instance == null) {
-            instance = new Lift(hwMap);
-        }
-        return instance;
-    }
-
-    private Lift(HardwareMap hwMap) {
+    public Lift(HardwareMap hwMap) {
 
         leftMotor = hwMap.get(DcMotorEx.class, "rightLift");
         leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
