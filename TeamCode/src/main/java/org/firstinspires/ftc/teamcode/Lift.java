@@ -12,23 +12,25 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 public class Lift extends SimpleSubsystem {
 
-    public static final double LOW_BASKET_POSITION = 28;
-    public static final double HIGH_BASKET_POSITION = 40;
-    public static final double PRE_LOW_CHAMBER_POSITION = 20;
-    public static final double LOW_CHAMBER_POSITION = 20;
-    public static final double PRE_HIGH_CHAMBER_POSITION = 35;
-    public static final double HIGH_CHAMBER_POSITION = 33;
+    private static final int MAX_HEIGHT_TICKS = 1;
+    private static final double MAX_HEIGHT_INCHES = 0;
 
-    public final double INCHES_PER_TICK = 1 / /*Ticks per revolution of output*/ (28 * 3.61 * 5.23) /*spool circumference*/ * (30 * 2 * Math.PI / 25.4);
+    private static final double LOW_BASKET_POSITION = 28;
+    private static final double HIGH_BASKET_POSITION = 40;
+    private static final double PRE_LOW_CHAMBER_POSITION = 20;
+    private static final double LOW_CHAMBER_POSITION = 20;
+    private static final double PRE_HIGH_CHAMBER_POSITION = 35;
+    private static final double HIGH_CHAMBER_POSITION = 33;
 
-    public static final double kP = 0;
-    public static final double kI = 0;
-    public static final double kD = 0;
-    public static final double kF = 0;
+    private final double INCHES_PER_TICK = MAX_HEIGHT_INCHES / MAX_HEIGHT_TICKS;
+
+    private static final double kP = 0;
+    private static final double kI = 0;
+    private static final double kD = 0;
+    private static final double kF = 0;
 
     private final DcMotorEx leftMotor;
     private final DcMotorEx rightMotor;
-
 
     private final PIDController leftPidController;
     private final PIDController rightPidController;

@@ -33,12 +33,12 @@ public class TeleOpDrive extends OpMode {
      */
     @Override
     public void init() {
-        follower = new Follower(hardwareMap);
-        intake = new Intake(hardwareMap);
-        extendo = new Extendo(hardwareMap);
-        lift = new Lift(hardwareMap);
-
-        CommandScheduler.getInstance().registerSubsystem(intake, extendo, lift);
+//        follower = new Follower(hardwareMap);
+//        intake = new Intake(hardwareMap);
+//        extendo = new Extendo(hardwareMap);
+//        lift = new Lift(hardwareMap);
+//
+//        CommandScheduler.getInstance().registerSubsystem(intake, extendo, lift);
 
         follower.startTeleopDrive();
     }
@@ -50,9 +50,9 @@ public class TeleOpDrive extends OpMode {
     //    telemetry.addData("Right Encoder Rotation: ", rightRear.getCurrentPosition());
     //    telemetry.addData("Strafe Encoder Rotation: ", leftRear.getCurrentPosition());
 
-        follower.setTeleOpMovementVectors(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+        follower.setTeleOpMovementVectors(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, false);
         follower.update();
-        CommandScheduler.getInstance().run();
+//        CommandScheduler.getInstance().run();
 
         telemetry.update();
     }
