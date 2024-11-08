@@ -30,26 +30,16 @@ public class TeleOpDrive extends OpMode {
     @Override
     public void init() {
         follower = new Follower(hardwareMap);
-
-        leftFront = hardwareMap.get(DcMotorEx.class, leftFrontMotorName);
-        leftRear = hardwareMap.get(DcMotorEx.class, leftRearMotorName);
-        rightRear = hardwareMap.get(DcMotorEx.class, rightRearMotorName);
-        rightFront = hardwareMap.get(DcMotorEx.class, rightFrontMotorName);
-
-        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
         follower.startTeleopDrive();
     }
 
     @Override
     public void loop() {
 
-        telemetry.addData("Left Encoder Rotation: ", rightFront.getCurrentPosition());
-        telemetry.addData("Right Encoder Rotation: ", rightRear.getCurrentPosition());
-        telemetry.addData("Strafe Encoder Rotation: ", leftRear.getCurrentPosition());
+     //   telemetry.addData("Left Encoder Rotation: ", rightFront.getCurrentPosition());
+    //    telemetry.addData("Right Encoder Rotation: ", rightRear.getCurrentPosition());
+    //    telemetry.addData("Strafe Encoder Rotation: ", leftRear.getCurrentPosition());
+
         telemetry.update();
         follower.setTeleOpMovementVectors(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
         follower.update();

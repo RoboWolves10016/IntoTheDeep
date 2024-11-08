@@ -8,11 +8,10 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.auton.paths.AutonPaths1;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
-import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierLine;
-import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Path;
-import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
+import org.firstinspires.ftc.teamcode.hardware.RobotHardwareC;
 
 /**
  * This is the StraightBackAndForth autonomous OpMode. It runs the robot in a specified distance
@@ -31,6 +30,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
 @Autonomous (name = "B Move Checks" , group = "Autonomous Pathing Tuning")
 public class MoveChecks extends OpMode {
     AutonPaths1 autonp = new AutonPaths1(this);
+    RobotHardwareC robot = new RobotHardwareC(this);
+
     private Telemetry telemetryA;
 
     public static double DISTANCE = 40;
@@ -40,8 +41,7 @@ public class MoveChecks extends OpMode {
     private Follower follower;
 
     // TODO: adjust this for each auto
-    private Pose startPose = new Pose(7.25, 89.25, 0);
-    private Pose spinPose = new Pose(-31, 9, 3.14);
+    private Pose startPose = new Pose(7.25, 89.25, Math.toRadians(180));
 
     private int pathState;
 
@@ -76,16 +76,14 @@ public class MoveChecks extends OpMode {
         switch (pathState) {
             case 1: // starts following the first path to score on the spike mark
                 follower.update();
-                if (!follower.isBusy()) {
+                if (robot.liftBar() && !follower.isBusy()) {
                     pausetime.reset();
                     pathState = 10;
                 }
                 break;
             case 10:
-                if (pausetime.seconds() > 0.5 ) {
-                    follower.followPath(autonp.move2);
-                    pathState = 11;
-                }
+                follower.followPath(autonp.move1b);
+                pathState = 11;
                 break;
             case 11: // starts following the first path to score on the spike mark
                 follower.update();
@@ -94,27 +92,23 @@ public class MoveChecks extends OpMode {
                 }
                 break;
             case 20:
-                if (pausetime.seconds() > 0.5 ) {
-                    follower.followPath(autonp.move3);
-                    pathState = 21;
+                if (robot.liftHook()){
+                    pathState=21;
                 }
                 break;
             case 21: // starts following the first path to score on the spike mark
-                follower.update();
-                if (!follower.isBusy()) {
-                    pathState = 30;
+                if (robot.clawOpen()){
+                    pathState=30;
                 }
                 break;
             case 30:
-                if (pausetime.seconds() > 0.5 ) {
-                    follower.followPath(autonp.move4);
-                    pathState = 31;
-                }
+                follower.followPath(autonp.move1c);
+                pathState = 31;
                 break;
             case 31: // starts following the first path to score on the spike mark
                 follower.update();
                 if (!follower.isBusy()) {
-                    pathState = 40;
+                    pathState = 100;
                 }
                 break;
             case 40:

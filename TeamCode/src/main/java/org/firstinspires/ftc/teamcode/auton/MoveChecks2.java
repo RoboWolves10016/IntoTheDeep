@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.tuning;
+package org.firstinspires.ftc.teamcode.auton;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -8,12 +9,11 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.auton.paths.AutonPaths1;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
+import org.firstinspires.ftc.teamcode.hardware.RobotHardwareC;
+
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
-import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierCurve;
-import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierLine;
-import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Path;
-import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
 
 /**
  * This is the StraightBackAndForth autonomous OpMode. It runs the robot in a specified distance
@@ -29,31 +29,26 @@ import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
  * @version 1.0, 3/12/2024
  */
 @Config
-@Autonomous (name = "A Move Practice" , group = "Autonomous Pathing Tuning")
-public class MovePractice extends OpMode {
+@Autonomous (name = "C Move Checks" , group = "Autonomous Pathing Tuning")
+@Disabled
+public class MoveChecks2 extends OpMode {
+    AutonPaths1 autonp = new AutonPaths1(this);
+    RobotHardwareC robot = new RobotHardwareC(this);
+
     private Telemetry telemetryA;
 
     public static double DISTANCE = 40;
 
-    private boolean forward = true;
+    private final boolean forward = true;
 
     private Follower follower;
 
-    private Path move1;
-    private Path move2;
-    private Path move3;
-    private Path move4;
-    private Path move5;
-    private Path move6;
-    private Path move7;
-    private Path move8;
     // TODO: adjust this for each auto
-    private Pose startPose = new Pose(7.25, 54.75, 0);
-    private Pose spinPose = new Pose(-31, 9, 3.14);
+    private final Pose startPose = new Pose(7.25, 89.25, Math.toRadians(180));
 
     private int pathState;
 
-    private ElapsedTime pausetime = new ElapsedTime();
+    private final ElapsedTime pausetime = new ElapsedTime();
 
 
     /**
@@ -64,32 +59,20 @@ public class MovePractice extends OpMode {
     public void init() {
         follower = new Follower(hardwareMap);
 
-        move1 = new Path(new BezierLine(new Point(7.25,54.75, Point.CARTESIAN), new Point(36.25,45.75, Point.CARTESIAN)));
-        move1.setConstantHeadingInterpolation(0); // to spot to hang specimin
-        //move2 = new Path(new BezierLine(new Point(36.25,45.75, Point.CARTESIAN), new Point(22.25,87.75, Point.CARTESIAN)));
-        move2 = new Path(new BezierCurve(new Point(36.32, 45.75, Point.CARTESIAN), new Point(22.25,87.75, Point.CARTESIAN), new Point(10,80, Point.CARTESIAN)));
-        move2.setConstantHeadingInterpolation(-2.35); // to 1st neutral specimin
-        move3 = new Path(new BezierLine(new Point(22.25,87.75, Point.CARTESIAN), new Point(17.25,89.75, Point.CARTESIAN)));
-        move3.setConstantHeadingInterpolation(-.78); // to basket
-        move4 = new Path(new BezierLine(new Point(17.25,89.75, Point.CARTESIAN), new Point(22.25,95.75, Point.CARTESIAN)));
-        move4.setConstantHeadingInterpolation(-2.26);  // to 2nd neutral specimin
-        move5 = new Path(new BezierLine(new Point(22.25,95.75, Point.CARTESIAN), new Point(17.25,89.75, Point.CARTESIAN)));
-        move5.setConstantHeadingInterpolation(-.78);// to basket
-        move6 = new Path(new BezierLine(new Point(17.25,89.75, Point.CARTESIAN), new Point(22.25,98.75, Point.CARTESIAN)));
-        move6.setConstantHeadingInterpolation(-2.26); // to 3rd neutral specimin
-        move7 = new Path(new BezierLine(new Point(22.25,98.75, Point.CARTESIAN), new Point(17.25,89.75, Point.CARTESIAN)));
-        move7.setConstantHeadingInterpolation(-.78);// to basket
-        move8 = new Path(new BezierLine(new Point(19.25,89.75, Point.CARTESIAN), new Point(62.25,66.75, Point.CARTESIAN)));
-        move8.setConstantHeadingInterpolation(-.74);  // to park
-       // backwards.setReversed(true);
-        follower.followPath(move1);
-
+        autonp.init();
+        robot.init();
         telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetryA.addLine("I am " +
+                this);
         telemetryA.addLine("This is our first trial moves for Into The Deep competition.");
         telemetryA.update();
         pathState = 1;
         follower.setStartingPose(startPose);
-        follower.followPath(move1);
+        follower.followPath(AutonPaths1.move1);
+        robot.clawClosed();
+        robot.undump();
+        telemetryA.addLine("Claw closed");
+        telemetryA.update();
     }
 
     /**
@@ -101,62 +84,120 @@ public class MovePractice extends OpMode {
         switch (pathState) {
             case 1: // starts following the first path to score on the spike mark
                 follower.update();
-                if (!follower.isBusy()) {
+                if (robot.liftBar() && !follower.isBusy()) {
                     pausetime.reset();
                     pathState = 10;
                 }
                 break;
             case 10:
-                if (pausetime.seconds() > 0.5 ) {
-                    follower.followPath(move2);
-                    pathState = 11;
+                if (pausetime.seconds() > 0 ) {
+                    follower.followPath(AutonPaths1.move1b);
+                    pathState = 12;
                 }
                 break;
-            case 11: // starts following the first path to score on the spike mark
+            case 12: // starts following the first path to score on the spike mark
                 follower.update();
                 if (!follower.isBusy()) {
+                    telemetryA.addLine("Going to lifthook");
+                    telemetryA.update();
+                    pathState = 14;
+                }
+
+                break;
+            case 14:
+                if (robot.liftHook()) {
+                    telemetryA.addLine("lift hook complete");
+                    telemetryA.update();
+                    pathState = 16;
+                    pausetime.reset();
+                }
+                break;
+            case 16:
+                if (robot.clawOpen() ) {
+                    pathState = 18;
+                }
+                break;
+            case 18:
+                if (pausetime.seconds() > 0 ) {
+                    follower.followPath(AutonPaths1.move2a);
                     pathState = 20;
                 }
                 break;
             case 20:
-                if (pausetime.seconds() > 0.5 ) {
-                    follower.followPath(move3);
+                follower.update();
+                robot.liftDown();
+                if (!follower.isBusy()) {
                     pathState = 21;
+                    pausetime.reset();
                 }
                 break;
-            case 21: // starts following the first path to score on the spike mark
-                follower.update();
-                if (!follower.isBusy()) {
-                    pathState = 30;
+            case 21:
+                robot.spinIn();
+                if (pausetime.seconds() > 0.7) {
+                    pathState = 22;
+                    pausetime.reset();
+                }
+                break;
+            case 22:
+                if (robot.armDown()) {
+                    pathState = 27;
+                    pausetime.reset();
+                }
+                break;
+            case 27:
+                if (pausetime.seconds() > 0.5 ) {
+                    robot.spinOff();
+                    if (robot.armUp()) {
+                        robot.spinOff();
+                        pathState = 30;
+                        pausetime.reset();
+                    }
                 }
                 break;
             case 30:
-                if (pausetime.seconds() > 0.5 ) {
-                    follower.followPath(move4);
-                    pathState = 31;
-                }
+                follower.followPath(AutonPaths1.move3);
+                pathState = 32;
                 break;
-            case 31: // starts following the first path to score on the spike mark
+            case 32: // to basket
                 follower.update();
                 if (!follower.isBusy()) {
-                    pathState = 40;
+                    pathState = 34;
+                }
+                break;
+            case 34:
+                robot.spinOff();
+                if (robot.liftBasket()) {
+                    telemetryA.addLine("lift hook complete");
+                    telemetryA.update();
+                    pathState = 36;
+                }
+                break;
+            case 36:
+                robot.dump();
+                pausetime.reset();
+                pathState = 38;
+                break;
+            case 38:
+                if (pausetime.seconds() > 1 ) {
+                    robot.undump();
+                    if (robot.liftDown()) {
+                        pathState = 40;
+                    }
                 }
                 break;
             case 40:
-                if (pausetime.seconds() > 0.5 ) {
-                    follower.followPath(move5);
+                    follower.followPath(AutonPaths1.move4);
                     pathState = 41;
-                }
                 break;
             case 41: // starts following the first path to score on the spike mark
                 follower.update();
-                if (!follower.isBusy()) {
-                    pathState = 50;
+                if (robot.liftDown() && !follower.isBusy()) {
+                    pathState = 100;
                 }
                 break;
             case 50:
                 if (pausetime.seconds() > 0.5 ) {
-                    follower.followPath(move6);
+                    follower.followPath(AutonPaths1.move5);
                     pathState = 51;
                 }
                 break;
@@ -168,7 +209,7 @@ public class MovePractice extends OpMode {
                 break;
             case 60:
                 if (pausetime.seconds() > 0.5 ) {
-                    follower.followPath(move7);
+                    follower.followPath(AutonPaths1.move6);
                     pathState = 61;
                 }
                 break;
@@ -179,14 +220,25 @@ public class MovePractice extends OpMode {
                 }
                 break;
             case 70:
-
                 if (pausetime.seconds() > 0.5 ) {
-                    follower.setMaxPower(1.0);
-                    follower.followPath(move8);
+                    follower.followPath(AutonPaths1.move7);
                     pathState = 71;
                 }
                 break;
             case 71: // starts following the first path to score on the spike mark
+                follower.update();
+                if (!follower.isBusy()) {
+                    pathState = 80;
+                }
+                break;
+            case 80:
+                if (pausetime.seconds() > 0.5 ) {
+                    follower.setStartingPose(new Pose(-10, -35, -0.85));
+                    follower.followPath(AutonPaths1.move8);
+                    pathState = 81;
+                }
+                break;
+            case 81: // starts following the first path to score on the spike mark
                 follower.update();
                 if (!follower.isBusy()) {
                     pathState = 100;
