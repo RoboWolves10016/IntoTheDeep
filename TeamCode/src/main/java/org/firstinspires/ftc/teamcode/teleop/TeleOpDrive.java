@@ -10,6 +10,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
@@ -40,6 +41,7 @@ public class TeleOpDrive extends OpMode {
 //
 //        CommandScheduler.getInstance().registerSubsystem(intake, extendo, lift);
 
+//        AnalogInput
         follower.startTeleopDrive();
     }
 

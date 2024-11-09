@@ -4,155 +4,85 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.Subsystem;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import java.util.Collections;
-import java.util.Set;
 @Config
 public class Intake extends SimpleSubsystem {
 
-    public static final double IN_POSITION = -27;
-    public static final double OUT_POSITION = 0;
-    public static final double IN_POWER = 1;
-    public static final double OUT_POWER = -1;
+    private static final double TRANSFER_LOWER_POS = 0;
+    private static final double TRANSFER_UPPER_POS = 0;
+    private static final double PRE_INTAKE_LOWER_POS = 0;
+    private static final double PRE_INTAKE_UPPER_POS = 0;
+    private static final double INTAKE_LOWER_POS = 0;
+    private static final double INTAKE_UPPER_POS = 0;
 
-    public static final double kP = 0;
-    public static final double kI = 0;
-    public static final double kD = 0;
-    public static final double kG = 0;
+    private static final double INTAKE_SPEED = 1;
+    private static final double EXHAUST_SPEED = 1;
 
-    private DcMotorEx flipper;
-    private CRServo spinner;
+    // This enum represents a state that the intake is commanded to be in
+    // The possible states are Transfer, Pre-Intake, and Intake
+    // We used an enum constructor so that we could link positions to each state
+    // These positions are accessible because the variables are public
+    public enum IntakeState {
+        TRANSFER(TRANSFER_LOWER_POS, TRANSFER_UPPER_POS, 0),
+        PRE_INTAKE(PRE_INTAKE_LOWER_POS, PRE_INTAKE_UPPER_POS, 0),
+        INTAKE(INTAKE_LOWER_POS, INTAKE_UPPER_POS, INTAKE_SPEED);
 
-    double spinnerPower = 0;
+        public final double lowerTarget;
+        public final double upperTarget;
+        public final double speed;
 
-    private PIDController pidController;
+        // Here's the aforementioned enum constructor
+        private IntakeState(double lowerTarget, double upperTarget, double intakeSpeed) {
+            this.lowerTarget = lowerTarget;
+            this.upperTarget = upperTarget;
+            this.speed = intakeSpeed;
+        }
+    }
 
-    private double currentPosition = IN_POSITION;
-    private double targetPosition = currentPosition;
+    private final Servo lowerJoint;
+    private final Servo upperJoint;
+    private final CRServo intake;
+
+    private IntakeState currentState = IntakeState.TRANSFER;
+
+    private boolean exhaust = false;
 
     public Intake(HardwareMap hwMap) {
-        spinner = hwMap.get(CRServo.class, "spinner");
-
-        flipper = hwMap.get(DcMotorEx.class, "flipper");
-        flipper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        // Positive direction is out from robot
-        flipper.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        pidController = new PIDController(kP, kI, kD);
+        lowerJoint = hwMap.servo.get("axonmax");
+        upperJoint = hwMap.servo.get("axonmini");
+        intake = hwMap.get(CRServo.class, "spinner");
     }
 
     @Override
     public void periodic() {
-        currentPosition = -27 + flipper.getCurrentPosition() * 360 / 288d;
-        double pid = pidController.calculate(currentPosition, targetPosition);
-        double ff = Math.cos(Math.toRadians(currentPosition)) * kG;
-        flipper.setPower(pid + ff);
-
-        spinner.setPower(spinnerPower);
+        lowerJoint.setPosition(currentState.lowerTarget);
+        upperJoint.setPosition(currentState.upperTarget);
+        intake.setPower(currentState.speed);
+        if(exhaust) {
+            intake.setPower(EXHAUST_SPEED);
+        }
     }
 
     @Override
     public void updateTelemetry(Telemetry telemetry) {
-        telemetry.addData("Flipper Pos Deg: ", currentPosition);
-        telemetry.addData("Flipper Target Deg: ", targetPosition);
-        telemetry.update();
-    }
-
-    public void flipOut() {
-        targetPosition = OUT_POSITION;
-    }
-
-    public void flipIn() {
-        targetPosition = IN_POSITION;
+        telemetry.addData("Intake State: ", currentState.name());
     }
 
     public void intake() {
-        spinnerPower = IN_POWER;
+        currentState = IntakeState.INTAKE;
     }
 
-    public void exhaust() {
-        spinnerPower = OUT_POWER;
+    public void preIntake() {
+        currentState = IntakeState.PRE_INTAKE;
     }
 
-    public void stopSpinner() {
-        spinnerPower = 0;
+    public void transferPosition() {
+        currentState = IntakeState.TRANSFER;
     }
 
-    public boolean atPosition() {
-        return Math.abs(currentPosition - targetPosition) < 1;
-    }
-
-    public Command intakeCommand(Intake intake) {
-        return new CommandBase() {
-            @Override
-            public void initialize() {
-                addRequirements(intake);
-                intake.flipOut();
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                intake.intake();
-            }
-
-            @Override
-            public boolean isFinished() {
-                return intake.atPosition();
-            }
-        };
-    }
-
-    public Command retractCommand(Intake intake) {
-        return new CommandBase() {
-            @Override
-            public void initialize() {
-                addRequirements(intake);
-                intake.stopSpinner();
-                intake.flipIn();
-            }
-
-            @Override
-            public boolean isFinished() {
-                return intake.atPosition();
-            }
-        };
-    }
-
-    public Command exhaustCommand(Intake intake) {
-        return new CommandBase() {
-            @Override
-            public void initialize() {
-                addRequirements(intake);
-                intake.flipOut();
-                intake.exhaust();
-            }
-
-            @Override
-            public void end(boolean interrupted) {
-                intake.stopSpinner();
-            }
-
-            @Override
-            public boolean isFinished() {
-                return intake.atPosition();
-            }
-        };
-    }
-    // TODO: Move to robot class and include retraction of extendo
-    public Command transferCommand(Intake intake) {
-        return retractCommand(intake)
-                .andThen(new InstantCommand(intake::exhaust).withTimeout(1000))
-                .andThen(new InstantCommand(intake::stopSpinner));
-    }
 }

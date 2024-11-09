@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -16,39 +17,21 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 @Config
 public class Extendo extends SimpleSubsystem {
 
-    public static final double IN_POSITION = 0;
-    public static final double OUT_POSITION = 0;
+    public static final double MIN_POSITION = 0;
+    public static final double MAX_POSITION = 1;
 
-    public static final double kP = 0;
-    public static final double kI = 0;
-    public static final double kD = 0;
+    private final Servo servo;
 
-    private final DcMotorEx motor;
 
-    private final PIDController pidController;
-
-    private double currentPosition = 0;
-    private double targetPosition = 0;
+    private double position;
 
     public Extendo(HardwareMap hwMap) {
-
-        motor = hwMap.get(DcMotorEx.class, "extendo");
-        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        // Positive direction is out from robot
-        motor.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        pidController = new PIDController(kP, kI, kD);
+        servo = hwMap.servo.get("extendo");
     }
 
-    public boolean atPosition() {
-        return Math.abs(currentPosition - targetPosition) < 1;
-    }
 
     @Override
     public void periodic() {
-        currentPosition = motor.getCurrentPosition() * 360 / 288d;
-        double pid = pidController.calculate(currentPosition, targetPosition);
-        motor.setPower(pid);
     }
 
     @Override
@@ -58,8 +41,7 @@ public class Extendo extends SimpleSubsystem {
         telemetry.update();
     }
 
-    public void setTargetPosition(double target) {
-        targetPosition = target;
+    public void extend() {
+        position += 0.1;
     }
-
 }
