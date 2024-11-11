@@ -1,32 +1,21 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
-import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants.leftFrontMotorName;
-import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants.leftRearMotorName;
-import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants.rightFrontMotorName;
-import static org.firstinspires.ftc.teamcode.pedroPathing.tuning.FollowerConstants.rightRearMotorName;
-
-import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode.Extendo;
-import org.firstinspires.ftc.teamcode.Intake;
-import org.firstinspires.ftc.teamcode.Lift;
+//import org.firstinspires.ftc.teamcode.subsystems.Extendo;
+//import org.firstinspires.ftc.teamcode.subsystems.Intake;
+//import org.firstinspires.ftc.teamcode.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
-import org.firstinspires.ftc.teamcode.pedroPathing.util.DashboardPoseTracker;
 
 @TeleOp(name = "Pedro Pathing TeleOp", group = "Test")
 public class TeleOpDrive extends OpMode {
 
     private Follower follower;
-    private Intake intake;
-    private Extendo extendo;
-    private Lift lift;
+
+//    private Intake intake;
+//    private Extendo extendo;
+//    private Lift lift;
 
 
     /**
@@ -57,5 +46,9 @@ public class TeleOpDrive extends OpMode {
 //        CommandScheduler.getInstance().run();
 
         telemetry.update();
+    }
+
+    private void configureBindings() {
+
     }
 }

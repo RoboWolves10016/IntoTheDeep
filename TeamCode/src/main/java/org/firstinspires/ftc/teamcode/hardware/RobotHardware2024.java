@@ -1,4 +1,6 @@
+
 package org.firstinspires.ftc.teamcode.hardware;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -20,6 +22,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 
 public class RobotHardware2024 {
+    // The IMU sensor object
+    BNO055IMU imu;  //gyro built into the rev hub
+
     // State used for updating telemetry
     Orientation angles;
     Acceleration gravity;
@@ -29,7 +34,7 @@ public class RobotHardware2024 {
     VoltageSensor battery;
 
     /* Declare OpMode members. */
-    private LinearOpMode myOpMode = null;   // gain access to methods in the calling OpMode.
+    private OpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 
     // Define Motor and Servo objects  (Make them private so they can't be accessed externally)
     private DcMotor wheel1 = null;
@@ -44,13 +49,14 @@ public class RobotHardware2024 {
     public Servo spinner = null;
     public Servo claw = null;
     public Servo dump = null;
+    public Servo slideservo = null;
     public TouchSensor liftdown = null;
 
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime moveTimer = new ElapsedTime();
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
-    public RobotHardware2024(LinearOpMode opmode) {myOpMode = opmode; }
+    public RobotHardware2024(OpMode opmode) {myOpMode = opmode; }
 
     /**
      * Initialize all the robot's hardware.
@@ -70,6 +76,8 @@ public class RobotHardware2024 {
         spinner = myOpMode.hardwareMap.get(Servo.class, "spinner");
         claw = myOpMode.hardwareMap.get(Servo.class, "claw");
         dump = myOpMode.hardwareMap.get(Servo.class, "dump");
+        slideservo = myOpMode.hardwareMap.get(Servo.class, "slideservo");
+        slideservo.setPosition(0.08);
 
         slide  = myOpMode.hardwareMap.get(DcMotor.class, "slide");
         slidewrist  = myOpMode.hardwareMap.get(DcMotor.class, "slidewrist");

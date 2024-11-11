@@ -525,7 +525,10 @@ public class Follower {
      * @param heading determines the heading vector for the robot in teleop.
      */
     public void setTeleOpMovementVectors(double forwardDrive, double lateralDrive, double heading) {
-        setTeleOpMovementVectors(forwardDrive, lateralDrive, heading, true);
+        setTeleOpMovementVectors(forwardDrive, lateralDrive, heading, true, -1);
+    }
+    public void setTeleOpMovementVectors(double forwardDrive, double lateralDrive, double heading, boolean roboCentric) {
+        setTeleOpMovementVectors(forwardDrive, lateralDrive, heading, roboCentric, -1);
     }
 
     /**
@@ -538,18 +541,95 @@ public class Follower {
      * @param heading determines the heading vector for the robot in teleop.
      * @param robotCentric sets if the movement will be field or robot centric
      */
-    public void setTeleOpMovementVectors(double forwardDrive, double lateralDrive, double heading, boolean robotCentric) {
+    public void setTeleOpMovementVectors(double forwardDrive, double lateralDrive, double heading,
+                                         boolean robotCentric, int holdAngle) {
         teleopDriveValues[0] = MathFunctions.clamp(forwardDrive, -1, 1);
         teleopDriveValues[1] = MathFunctions.clamp(lateralDrive, -1, 1);
         teleopDriveValues[2] = MathFunctions.clamp(heading, -1, 1);
         teleopDriveVector.setOrthogonalComponents(teleopDriveValues[0], teleopDriveValues[1]);
         teleopDriveVector.setMagnitude(MathFunctions.clamp(teleopDriveVector.getMagnitude(), 0, 1));
 
+        double nHeading = MathFunctions.normalizeAngle(getPose().getHeading());
+        double hVector = 0;
         if (robotCentric) {
             teleopDriveVector.rotateVector(getPose().getHeading());
+            teleopHeadingVector.setComponents(teleopDriveValues[2], getPose().getHeading());
+        } else if (holdAngle == 0) {
+            if (nHeading > Math.PI) {
+                if (nHeading > Math.toRadians(359.5)) {
+                    hVector = 0;
+                } else if (nHeading > Math.toRadians(358.5)) {
+                    hVector = MathFunctions.clamp(0.05 - (nHeading -2*Math.PI)/Math.PI, 0, 1);
+                } else if (nHeading > Math.toRadians(340)) {
+                    hVector = MathFunctions.clamp(0.1 - (nHeading -2*Math.PI)/Math.PI, 0, 1);
+                } else {
+                    hVector = 1;
+                }
+                teleopHeadingVector.setComponents(hVector, getPose().getHeading());
+            } else {
+                if (nHeading < Math.toRadians(0.5)) {
+                    hVector = 0;
+                } else if (nHeading < Math.toRadians(1.5)){
+                    hVector = MathFunctions.clamp(-nHeading/Math.PI - 0.05, -1, 0);
+                } else if (nHeading < Math.toRadians(20)) {
+                        hVector = MathFunctions.clamp(-nHeading/Math.PI - 0.1, -1, 0);
+                } else {
+                    hVector = -1;
+                }
+                teleopHeadingVector.setComponents(hVector, getPose().getHeading());
+            }
+       /* } else if (holdAngle == 180) {
+            if (nHeading < Math.PI) {
+                if (nHeading > Math.toRadians(179.5)) {
+                    hVector = 0;
+                } else if (nHeading > Math.toRadians(178.5)) {
+                    hVector = MathFunctions.clamp(0.05 + (Math.PI - nHeading) / Math.PI, 0, 1);
+                } else if (nHeading > Math.toRadians(160)) {
+                    hVector = MathFunctions.clamp(0.1 + (Math.PI - nHeading) / Math.PI, 0, 1);
+                } else {
+                    hVector = 1;
+                }
+                teleopHeadingVector.setComponents(hVector, getPose().getHeading());
+            } else {
+                if (nHeading < Math.toRadians(180.5)) {
+                    hVector = 0;
+                } else if (nHeading < Math.toRadians(181.5)) {
+                    hVector = MathFunctions.clamp((Math.PI - nHeading) / Math.PI - 0.05, -1, 0);
+                } else if (nHeading < Math.toRadians(200)) {
+                    hVector = MathFunctions.clamp((Math.PI - nHeading) - 0.1, -1, 0);
+                } else {
+                    hVector = -1;
+                }
+                teleopHeadingVector.setComponents(hVector, getPose().getHeading());
+            }*/
+        } else if (holdAngle > 0) {
+            nHeading = MathFunctions.normalizeAngle(nHeading + Math.toRadians(180 - holdAngle));
+            if (nHeading < Math.PI) {
+                if (nHeading > Math.toRadians(179.5)) {
+                    hVector = 0;
+                } else if (nHeading > Math.toRadians(178.5)) {
+                    hVector = MathFunctions.clamp(0.05 + (Math.PI - nHeading) / Math.PI, 0, 1);
+                } else if (nHeading > Math.toRadians(160)) {
+                    hVector = MathFunctions.clamp(0.1 + (Math.PI - nHeading) / Math.PI, 0, 1);
+                } else {
+                    hVector = 1;
+                }
+                teleopHeadingVector.setComponents(hVector, getPose().getHeading());
+            } else {
+                if (nHeading < Math.toRadians(180.5)) {
+                    hVector = 0;
+                } else if (nHeading < Math.toRadians(181.5)) {
+                    hVector = MathFunctions.clamp((Math.PI - nHeading) / Math.PI - 0.05, -1, 0);
+                } else if (nHeading < Math.toRadians(200)) {
+                    hVector = MathFunctions.clamp((Math.PI - nHeading) - 0.1, -1, 0);
+                } else {
+                    hVector = -1;
+                }
+                teleopHeadingVector.setComponents(hVector, getPose().getHeading());
+            }
+        } else {
+            teleopHeadingVector.setComponents(teleopDriveValues[2], getPose().getHeading());
         }
-
-        teleopHeadingVector.setComponents(teleopDriveValues[2], getPose().getHeading());
     }
 
     /**
