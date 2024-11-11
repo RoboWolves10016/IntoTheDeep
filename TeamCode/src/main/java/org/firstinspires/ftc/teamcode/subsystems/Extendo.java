@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.SimpleSubsystem;
 
 @Config
- class Extendo extends SimpleSubsystem {
+public class Extendo extends SimpleSubsystem {
 
 double MIN_POSITION = 0;
     public static final double MAX_POSITION = 1;
@@ -23,11 +23,18 @@ double MIN_POSITION = 0;
     }
 
     @Override
-    public void periodic() {
+    public void init() {
+
     }
 
     @Override
+    public void periodic() {
+    }
+
+
+    @Override
     public void updateTelemetry(Telemetry telemetry) {
+        telemetry.addLine("-------------\nExtendo");
 
     }
 

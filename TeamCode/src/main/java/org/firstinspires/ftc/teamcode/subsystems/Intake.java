@@ -11,10 +11,15 @@ import org.firstinspires.ftc.teamcode.SimpleSubsystem;
 @Config
 public class Intake extends SimpleSubsystem {
 
+    private static final double IDLE_LOWER_POS = 0;
+    private static final double IDLE_UPPER_POS = 0;
+
     private static final double TRANSFER_LOWER_POS = 0;
     private static final double TRANSFER_UPPER_POS = 0;
+
     private static final double PRE_INTAKE_LOWER_POS = 0;
     private static final double PRE_INTAKE_UPPER_POS = 0;
+
     private static final double INTAKE_LOWER_POS = 0;
     private static final double INTAKE_UPPER_POS = 0;
 
@@ -26,6 +31,7 @@ public class Intake extends SimpleSubsystem {
     // We used an enum constructor so that we could link positions to each state
     // These positions are accessible because the variables are public
     public enum IntakeState {
+        IDLE(IDLE_LOWER_POS, IDLE_UPPER_POS, 0),
         TRANSFER(TRANSFER_LOWER_POS, TRANSFER_UPPER_POS, 0),
         PRE_INTAKE(PRE_INTAKE_LOWER_POS, PRE_INTAKE_UPPER_POS, 0),
         INTAKE(INTAKE_LOWER_POS, INTAKE_UPPER_POS, INTAKE_SPEED);
@@ -57,7 +63,9 @@ public class Intake extends SimpleSubsystem {
     }
 
     @Override
-    public void init() {}
+    public void init() {
+
+    }
 
     @Override
     public void periodic() {
@@ -71,6 +79,7 @@ public class Intake extends SimpleSubsystem {
 
     @Override
     public void updateTelemetry(Telemetry telemetry) {
+        telemetry.addLine("-------------\nIntake");
         telemetry.addData("Intake State: ", currentState.name());
     }
 

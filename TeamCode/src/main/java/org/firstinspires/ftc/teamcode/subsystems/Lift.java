@@ -55,6 +55,11 @@ public class Lift extends SimpleSubsystem {
     }
 
     @Override
+    public void init() {
+
+    }
+
+    @Override
     public void periodic() {
         leftPosition = leftMotor.getCurrentPosition() * INCHES_PER_TICK;
         rightPosition = rightMotor.getCurrentPosition() * INCHES_PER_TICK;
@@ -64,12 +69,13 @@ public class Lift extends SimpleSubsystem {
         rightMotor.setPower(rightPid + kF);
     }
 
+
     @Override
     public void updateTelemetry(Telemetry telemetry) {
+        telemetry.addLine("-------------\nLift");
         telemetry.addData("Left Lift Pos: ", leftPosition);
         telemetry.addData("Right Lift Pos: ", rightPosition);
         telemetry.addData("Lift Target: ", target);
-        telemetry.update();
     }
 
     public boolean atPosition() {

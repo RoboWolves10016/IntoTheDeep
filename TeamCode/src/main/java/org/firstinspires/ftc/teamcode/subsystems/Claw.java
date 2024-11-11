@@ -20,7 +20,7 @@ public class Claw extends SimpleSubsystem {
     private boolean open = false;
 
 
-    private Claw(HardwareMap hwMap) {
+    public Claw(HardwareMap hwMap) {
         servo = hwMap.get(Servo.class, "claw");
     }
 
@@ -35,6 +35,7 @@ public class Claw extends SimpleSubsystem {
 
     @Override
     public void updateTelemetry(Telemetry telemetry) {
+        telemetry.addLine("-------------\nClaw");
         telemetry.addData("Claw Open: ", open);
         telemetry.addData("Claw Pos: ", servo.getPosition());
     }
