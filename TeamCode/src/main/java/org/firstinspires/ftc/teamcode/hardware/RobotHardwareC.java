@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -10,11 +11,15 @@ public class RobotHardwareC {
 
     static final double CLAWOPEN = 0.28, CLAWCLOSED = 0.49;
     static final double DUMPUP = 0.53, DUMPDOWN = 0.32;
+    static final double intakeMax = 0.03, intakeMini = 0.18; // was 0.08, 0.146
+    static final double transferMax = 0.83, transferMini = 0.67;
+    static final double idleMax = 0.70, idleMini = 0.45;
     static final int ARMUP = 0, ARMDOWN = -100;
-    static final double SPININ = 1, SPINOUT = 0, SPINOFF = 0.5;
-    static final int SLIDEOUT = 0, SLIDEIN = 0;
-    static final int LIFTBAR = 3050, LIFTHOOK = 2350, LIFTBASKET = 5100, LIFTDOWN = 0, LIFTWALL = 700, CLOSECOUNTS = 5;
-    static final double DUMP = 0.38, UNDUMP = 0.07;
+    static final double SPININ = -1, SPINOUT = 1, SPINOFF = 0;
+    static final double SLIDEOUT = 0.8, SLIDEIN = 0.176;
+    //static final int LIFTBAR = 3050, LIFTHOOK = 2350, LIFTBASKET = 5100, LIFTDOWN = 0, LIFTWALL = 700, CLOSECOUNTS = 5;
+    static final int LIFTBAR = 1691, LIFTHOOK = 1303, LIFTBASKET = 2800, LIFTDOWN = 0, LIFTWALL = 388, CLOSECOUNTS = 5;
+    static final double DUMP = 0.49, UNDUMP = 0.04;
 
     VoltageSensor battery;
 
@@ -25,8 +30,10 @@ public class RobotHardwareC {
     public DcMotor slide = null;
     public DcMotor liftL = null;
     public DcMotor liftR = null;
-    public DcMotor slidewrist = null;
-    public Servo spinner = null;
+    public Servo slideservo = null;
+    public Servo axonMax;
+    public Servo axonMini;
+    public CRServo spinner;
     public Servo claw = null;
     public Servo dump = null;
 
@@ -46,32 +53,25 @@ public class RobotHardwareC {
         battery = myOpMode.hardwareMap.get(VoltageSensor.class, "Control Hub");
         // Define and Initialize Motors (note: need to use reference to actual OpMode).
 
-        spinner = myOpMode.hardwareMap.get(Servo.class, "spinner");
+        spinner = myOpMode.hardwareMap.get(CRServo.class, "spinner");
         claw = myOpMode.hardwareMap.get(Servo.class, "claw");
         dump = myOpMode.hardwareMap.get(Servo.class, "dump");
+        slideservo = myOpMode.hardwareMap.get(Servo.class, "slideservo");
+        axonMax = myOpMode.hardwareMap.get(Servo.class, "axonmax");
+        axonMini = myOpMode.hardwareMap.get(Servo.class, "axonmini");
 
-        slide  = myOpMode.hardwareMap.get(DcMotor.class, "slide");
-        slidewrist  = myOpMode.hardwareMap.get(DcMotor.class, "slidewrist");
         liftL = myOpMode.hardwareMap.get(DcMotor.class, "liftL");
         liftR = myOpMode.hardwareMap.get(DcMotor.class, "liftR");
 
-        slide.setDirection(DcMotor.Direction.FORWARD);
         liftL.setDirection(DcMotor.Direction.REVERSE);
         liftR.setDirection(DcMotor.Direction.REVERSE);
-        slidewrist.setDirection(DcMotor.Direction.REVERSE);
 
-
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slidewrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        slidewrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -85,33 +85,33 @@ public class RobotHardwareC {
         claw.setPosition(CLAWOPEN);
         return (claw.getPosition() < 0.31);
     }
-    public boolean armDown() {
-        slidewrist.setTargetPosition(ARMDOWN);
-        slidewrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        slidewrist.setPower(0.8);
-
-        return (slidewrist.getCurrentPosition() < ARMDOWN + CLOSECOUNTS);
+    public boolean intakePos() {
+        axonMax.setPosition(intakeMax);
+        axonMini.setPosition(intakeMini);
+        return (true);
     }
-    public boolean armUp() {
-        slidewrist.setTargetPosition(ARMUP);
-        slidewrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        slidewrist.setPower(0.9);
-
-        return (slidewrist.getCurrentPosition() > -15);
+    public boolean transferPos() {
+        axonMax.setPosition(transferMax);
+        axonMini.setPosition(transferMini);
+        return (true);
     }
-    public void spinIn() {
-        spinner.setPosition(SPININ);
+    public boolean idlePos() {
+        axonMax.setPosition(idleMax);
+        axonMini.setPosition(idleMini);
+        return (true);
     }
+    public void spinIn() {spinner.setPower(SPININ);}
     public void spinOut() {
-        spinner.setPosition(SPINOUT);
+        spinner.setPower(SPINOUT);
     }
     public void spinOff() {
-        spinner.setPosition(SPINOFF);
+        spinner.setPower(SPINOFF);
     }
     public void slideOut() {
-
+        slideservo.setPosition(SLIDEOUT);
     }
     public void slideIn() {
+        slideservo.setPosition(SLIDEIN);
 
     }
     public boolean liftDown() {

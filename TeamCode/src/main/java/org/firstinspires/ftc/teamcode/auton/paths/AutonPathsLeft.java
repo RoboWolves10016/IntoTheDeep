@@ -15,11 +15,13 @@ public class AutonPathsLeft {
     public static Path movepl;
     public static Path movepr;
     public static Path move1, move1b, move1c;
+    public static Path move1y, move1by, move1cy;
     public static Path move2, move2a, move2b, move2c, move2d, move2e, move2b2, move2t, move2d2;
+    public static Path move2ay;
     public static Path move3, move3b;
     public static Path move4, move4a;
     public static Path move5;
-    public static Path move6;
+    public static Path move6, move6a;
     public static Path move7;
     public static Path move8;
     public static Path move12, move12b, move22a;
@@ -45,21 +47,33 @@ public class AutonPathsLeft {
                 new Point(36.,78, Point.CARTESIAN)));
         move1b.setConstantHeadingInterpolation(Math.toRadians(180)); // to spot to hang specimin
 
+        // move to basket
+        move1y = new Path(new BezierCurve(
+                new Point(7.25,87.75, Point.CARTESIAN),
+                new Point(51,82, Point.CARTESIAN),
+                new Point(14.5,130.5, Point.CARTESIAN)));
+        move1y.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(-45)); // to basket
+
         move1c = new Path(new BezierLine(
                 new Point(34.5,78, Point.CARTESIAN),
                 new Point(32,78, Point.CARTESIAN)));
-        move1b.setConstantHeadingInterpolation(Math.toRadians(180)); // to spot to hang specimin
+        move1c.setConstantHeadingInterpolation(Math.toRadians(180)); // to spot to hang specimin
 
         move2a = new Path(new BezierCurve(
                 new Point(32.5, 78, Point.CARTESIAN),
                 new Point(30,86, Point.CARTESIAN)));
         move2a.setConstantHeadingInterpolation(Math.toRadians(90));
 
-        // to 1st neutral specimen
+        move2ay = new Path(new BezierCurve(
+                new Point(14.5, 130, Point.CARTESIAN),
+                new Point(30,86, Point.CARTESIAN)));
+        move2ay.setConstantHeadingInterpolation(Math.toRadians(90));
+
+        // to 1st neutral specimen/spike
         move2b = new Path(new BezierCurve(
              new Point(30, 86, Point.CARTESIAN),
-             new Point(36.5,104, Point.CARTESIAN)));
-        move2b.setConstantHeadingInterpolation(Math.toRadians(72));
+             new Point(38,109, Point.CARTESIAN)));
+        move2b.setConstantHeadingInterpolation(Math.toRadians(68));
 
         move2c = new Path(new BezierCurve(
                 new Point(36.5, 104, Point.CARTESIAN),
@@ -82,43 +96,43 @@ public class AutonPathsLeft {
         move2e.setConstantHeadingInterpolation(Math.toRadians(70));
 
         // to basket
-        move3 = new Path(new BezierLine(
-                new Point(44,115.5, Point.CARTESIAN),
-                new Point(46,110, Point.CARTESIAN)));
-        move3.setConstantHeadingInterpolation(Math.toRadians(90)); // to basket
-
         move3b = new Path(new BezierLine(
                 new Point(44,110, Point.CARTESIAN),
                 new Point(14.5,130.5, Point.CARTESIAN)));
         move3b.setConstantHeadingInterpolation(Math.toRadians(-45)); // to basket
 
-        // to 2nd neutral specimen
+        // to 2nd neutral specimen/spike
         move4 = new Path(new BezierLine(
                 new Point(14.5,130.5, Point.CARTESIAN),
-                new Point(17,112, Point.CARTESIAN)));
-        move4.setConstantHeadingInterpolation(Math.toRadians(90));  // back up
+                new Point(38.5,115, Point.CARTESIAN)));
+        move4.setConstantHeadingInterpolation(Math.toRadians(68));  // to 2nd neutral specimen
 
         move4a = new Path(new BezierLine(
-                new Point(17.,112, Point.CARTESIAN),
-                new Point(43,114, Point.CARTESIAN)));
-        move4a.setConstantHeadingInterpolation(Math.toRadians(90));  // to 2nd neutral specimen
+                new Point(38.5,115, Point.CARTESIAN),
+                new Point(38.5,119, Point.CARTESIAN)));
+        move4a.setConstantHeadingInterpolation(Math.toRadians(72));  // to 2nd neutral specimen
         // to basket
         move5 = new Path(new BezierLine(
-                new Point(22.25,130.35, Point.CARTESIAN),
-                new Point(17.25,124.25, Point.CARTESIAN)));
-        move5.setConstantHeadingInterpolation(-.78);// to basket
+                new Point(38,119, Point.CARTESIAN),
+                new Point(14.5,130.5, Point.CARTESIAN)));
+        move5.setConstantHeadingInterpolation(Math.toRadians(-45));// to basket
 
-        // to 3rd neutral specimen
+        // to 3rd neutral specimen/spike
         move6 = new Path(new BezierLine(
-                new Point(17.25,124.25, Point.CARTESIAN),
-                new Point(22.25,133.25, Point.CARTESIAN)));
-        move6.setConstantHeadingInterpolation(-2.26); // to 3rd neutral specimen
+                new Point(14.5,130.5, Point.CARTESIAN),
+                new Point(39.5,124, Point.CARTESIAN)));
+        move6.setConstantHeadingInterpolation(Math.toRadians(68)); // to 3rd neutral specimen
+
+        move6a = new Path(new BezierLine(
+                new Point(39.5,124, Point.CARTESIAN),
+                new Point(38.5,128, Point.CARTESIAN)));
+        move6a.setConstantHeadingInterpolation(Math.toRadians(72)); // to 3rd neutral specimen
 
         // to basket
         move7 = new Path(new BezierLine(
-                new Point(22.25,133.25, Point.CARTESIAN),
-                new Point(17.25,124.25, Point.CARTESIAN)));
-        move7.setConstantHeadingInterpolation(-.78);// to basket
+                new Point(38,127, Point.CARTESIAN),
+                new Point(14.5,130.5, Point.CARTESIAN)));
+        move7.setConstantHeadingInterpolation(Math.toRadians(-45));// to basket
 
         // to park
         move8 = new Path(new BezierLine(

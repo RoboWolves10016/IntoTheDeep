@@ -33,9 +33,7 @@ public class CompetitionAutonLeft extends OpMode {
     RobotHardwareC robot = new RobotHardwareC(this);
 
     private Telemetry telemetryA;
-
     public static double DISTANCE = 40;
-
     private final boolean forward = true;
 
     private Follower follower;
@@ -81,6 +79,8 @@ public class CompetitionAutonLeft extends OpMode {
     public void loop() {
         switch (pathState) {
             case 1: // starts following the first path to score a sample on the bar wait for lift to be up before moving on
+                robot.idlePos();
+                robot.slideIn();
                 follower.update();
                 if (robot.liftBar() && !follower.isBusy()) {
                     pausetime.reset();
@@ -95,7 +95,7 @@ public class CompetitionAutonLeft extends OpMode {
                 break;
             case 12: // moves up against the bar
                 follower.update();
-                if (!follower.isBusy()) {
+                if (!follower.isBusy() || pausetime.seconds() > 0.4) {
                     telemetryA.addLine("Going to lifthook");
                     telemetryA.update();
                     pathState = 14;
@@ -111,12 +111,12 @@ public class CompetitionAutonLeft extends OpMode {
                 }
                 break;
             case 16: // open the claw
-                if (pausetime.seconds() > 0.05 && robot.clawOpen()) {
+                if (robot.clawOpen() && pausetime.seconds() > 0.2) {
                     pathState = 18;
                 }
                 break;
             case 18:  // move back and turn 90 deg
-                if (pausetime.seconds() > 0.2) {
+                if (pausetime.seconds() > 0.0) {
                     follower.followPath(autonp.move2a);
                     pathState = 20;
                 }
@@ -124,8 +124,9 @@ public class CompetitionAutonLeft extends OpMode {
             case 20:
                 follower.update();
                 robot.liftDown();
+                robot.intakePos();
+                robot.spinIn();
                 if (!follower.isBusy()) {
-                    //   robot.spinIn();
                     pathState = 21;
                     pausetime.reset();
                 }
@@ -136,81 +137,29 @@ public class CompetitionAutonLeft extends OpMode {
                 break;
             case 22:
                 follower.update();
-                robot.armDown();
-                if (!follower.isBusy() || follower.getPose().getY() > 103) {
-                    pathState = 23;
-                }
-                break;
-            case 23: // drive a little forward to align the sample
-                if (robot.armDown()) {
-                    follower.followPath(autonp.move2c);
-                    pausetime.reset();
-                    pathState = 24;
-                }
-                break;
-            case 24:
-                follower.update();
-                if (!follower.isBusy() || pausetime.seconds() > 0.7) {
-                    robot.spinIn();
-                    pathState = 26;
-                    pausetime.reset();
-                }
-                break;
-            case 26:  // move forward so spinner aligns the sample
-                follower.followPath(autonp.move2d);
-                pathState = 27;
-                pausetime.reset();
-                break;
-            case 27:
-                follower.update();
-                if (!follower.isBusy() || pausetime.seconds() > 0.7) {
-                    robot.armUp();
+                if (!follower.isBusy()) { //|| follower.getPose().getY() > 103
                     pathState = 30;
-                    pausetime.reset();
-                }
-                break;
-            case 28: // start the spinner
-                robot.spinIn();
-                follower.followPath(autonp.move2e);
-                if (pausetime.seconds() > 0) {
-                    pathState = 29;
-                    pausetime.reset();
-                }
-                break;
-            case 29:
-                follower.update();
-                if (pausetime.seconds() > 1.0 ) {
-                   // robot.spinOff();
-                    if (robot.armUp()) {
-                        pathState = 32; // skip to move3b
-                        pausetime.reset();
-                    }
                 }
                 break;
             case 30: // move to the basket
-                follower.followPath(autonp.move3);
-                pathState = 31;
-                break;
-            case 31: // to basket
-                follower.update();
-                if (!follower.isBusy()) {
-                    pathState = 32;
-                }
-                break;
-            case 32: // move to the basket
-            //    robot.spinOff();
+                //robot.spinOff();
+                robot.transferPos();
+                pausetime.reset();
                 follower.followPath(autonp.move3b);
                 pathState = 33;
                 break;
             case 33: // to basket
-              //  robot.spinIn();
                 follower.update();
+                if (pausetime.seconds()>0.5) {
+                    robot.spinOut();
+                }
                 if (!follower.isBusy()) {
                     pathState = 34;
                 }
                 break;
             case 34:
                 robot.spinOff();
+                robot.idlePos();
                 if (robot.liftBasket()) {
                     telemetryA.addLine("lift basket complete");
                     telemetryA.update();
@@ -225,12 +174,16 @@ public class CompetitionAutonLeft extends OpMode {
             case 38:
                 if (pausetime.seconds() > 1 ) {
                     robot.undump();
-                    if (pausetime.seconds() > 1) {
+                    if (pausetime.seconds() > 0.02) {
                         pathState = 40;
                     }
                 }
                 break;
-            case 40:
+            case 40: // to 2nd sample
+               // robot.slideOut();
+                robot.intakePos();
+                robot.spinIn();
+                robot.liftDown();
                 follower.followPath(autonp.move4);
                 pathState = 44;
                 break;
@@ -246,61 +199,96 @@ public class CompetitionAutonLeft extends OpMode {
                     follower.followPath(autonp.move4a);
                     pathState = 48;
                 break;
-            case 48: // starts following the first path to score on the spike mark
+            case 48: //
                 follower.update();
                 if (robot.liftDown() && !follower.isBusy()) {
-                    pathState = 100;
+                    pausetime.reset();
+                    pathState = 50;
                 }
                 break;
-            case 50:
-                if (pausetime.seconds() > 0.5 ) {
+            case 50: // to basket
+             //   robot.spinOff();
+                robot.transferPos();
+                if (pausetime.seconds() > 0.6 ) {
+                    robot.spinOut();
                     follower.followPath(autonp.move5);
-                    pathState = 51;
+                    pathState = 52;
                 }
                 break;
-            case 51: // starts following the first path to score on the spike mark
+            case 52: //
                 follower.update();
                 if (!follower.isBusy()) {
-                    pathState = 60;
+                    pathState = 54;
                 }
                 break;
-            case 60:
-                if (pausetime.seconds() > 0.5 ) {
-                    follower.followPath(autonp.move6);
-                    pathState = 61;
+            case 54:
+                robot.spinOff();
+                robot.idlePos();
+                if (robot.liftBasket()) {
+                    telemetryA.addLine("lift basket complete");
+                    telemetryA.update();
+                    pathState = 56;
                 }
                 break;
-            case 61: // starts following the first path to score on the spike mark
+            case 56: // puke in basket
+                robot.dump();
+                pausetime.reset();
+                pathState = 58;
+                break;
+            case 58:
+                if (pausetime.seconds() > 1 ) {
+                    robot.undump();
+                    if (pausetime.seconds() > 0.02) {
+                        pathState = 60;
+                    }
+                }
+                break;
+            case 60: // to 3rd spike mark
+                // robot.slideOut();
+                robot.intakePos();
+                robot.spinIn();
+                robot.liftDown();
+                follower.followPath(autonp.move6);
+                pathState = 64;
+                break;
+
+            case 64:
                 follower.update();
                 if (!follower.isBusy()) {
+                    pathState = 66;
+                }
+                break;
+            case 66:
+                robot.liftDown();
+                follower.followPath(autonp.move6a);
+                pathState = 68;
+                break;
+            case 68: // starts following the first path to score on the spike mark
+                follower.update();
+                if (robot.liftDown() && !follower.isBusy()) {
+                    pausetime.reset();
                     pathState = 70;
                 }
                 break;
-            case 70:
-                if (pausetime.seconds() > 0.5 ) {
+            case 70: // to basket
+              //  robot.spinOff();
+                robot.transferPos();
+                if (pausetime.seconds() > 0.3 ) {
                     follower.followPath(autonp.move7);
-                    pathState = 71;
+                    pathState = 72;
+                    pausetime.reset();
                 }
                 break;
-            case 71: // starts following the first path to score on the spike mark
+            case 72: //
                 follower.update();
-                if (!follower.isBusy()) {
-                    pathState = 80;
+                if (pausetime.seconds() > 1) {
+                    robot.spinOut();
                 }
-                break;
-            case 80:
-                if (pausetime.seconds() > 0.5 ) {
-                    follower.setStartingPose(new Pose(-10, -35, -0.85));
-                    follower.followPath(autonp.move8);
-                    pathState = 81;
-                }
-                break;
-            case 81: // starts following the first path to score on the spike mark
-                follower.update();
                 if (!follower.isBusy()) {
                     pathState = 100;
                 }
                 break;
+
             case 100:
                 break;
         }

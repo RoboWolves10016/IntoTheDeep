@@ -31,8 +31,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.Point;
  * @version 1.0, 3/12/2024
  */
 @Config
-@Autonomous (name = "Competition Auton Right2" , group = "Autonomous")
-public class CompetitionAutonRight extends OpMode {
+@Autonomous (name = "Competition Auton Right Hang 3" , group = "Autonomous")
+public class CompetitionAutonRight3Hang extends OpMode {
     AutonPathsRight autonp = new AutonPathsRight(this);
     RobotHardwareC robot = new RobotHardwareC(this);
 
@@ -65,16 +65,15 @@ public class CompetitionAutonRight extends OpMode {
         move2 = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         new Point(36,96, Point.CARTESIAN),
-                        new Point(28,93, Point.CARTESIAN),
-                        new Point(12,85, Point.CARTESIAN),
-                        new Point(26,76, Point.CARTESIAN)))
-                .addPath(new BezierCurve(
-                        new Point(26, 76, Point.CARTESIAN),
-                        new Point(40, 52, Point.CARTESIAN),
-                        new Point(60, 77, Point.CARTESIAN),
-                        new Point(62,65, Point.CARTESIAN)))
-                .setConstantHeadingInterpolation(Math.toRadians(0))
-                .setPathEndTimeoutConstraint(0)
+                        new Point(24,96, Point.CARTESIAN),
+                        new Point(20,95, Point.CARTESIAN),
+                        new Point(20,80, Point.CARTESIAN)))
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(-90))
+                .addPath(new BezierLine(
+                        new Point(20, 80, Point.CARTESIAN),
+                        new Point(11,59, Point.CARTESIAN)))
+                .setConstantHeadingInterpolation(0)
+                .setPathEndTimeoutConstraint(0.5)
                 .build();
 
         autonp.init();
@@ -109,7 +108,7 @@ public class CompetitionAutonRight extends OpMode {
                 pausetime.reset();
                 pathState = 2;
                 break;
-            case 2: // starts following the first path to score on the spike mark
+            case 2: //
                 if (pausetime.seconds() > 0) {
                     follower.update();
 
@@ -146,12 +145,14 @@ public class CompetitionAutonRight extends OpMode {
             case 16:
                 robot.clawOpen();
                 if (pausetime.seconds() > 0.05) {
+                    pausetime.reset();
                     pathState = 18;
                 }
                 break;
-            case 18: // move back behind the colored samples
+            case 18: // move to wall for 1st sample
                 if (pausetime.seconds() > 0.5) {
                     follower.followPath(move2);
+                    pausetime.reset();
                     pathState = 20;
                 }
                 break;
@@ -159,66 +160,20 @@ public class CompetitionAutonRight extends OpMode {
                 follower.update();
                 robot.liftWall();
                 if (!follower.isBusy()) { //|| follower.getPose().getX() > 66
-                    pathState = 21;
-                    pausetime.reset();
-                }
-                break;
-            case 21: // move 1st sample to the wall
-                follower.followPath(autonp.move3);
-                pathState = 22;
-                break;
-            case 22:
-                follower.update();
-                if (!follower.isBusy()) { // || follower.getPose().getX() < 12
-                    pathState = 23;
-                }
-                break;
-            case 23: // move 2nd sample to the wall
-                follower.followPath(autonp.move4);
-                pathState = 24;
-                break;
-            case 24:
-                follower.update();
-                if (follower.getPose().getX() > 13) {backed = true;}
-                if (true) {
-                    if (!follower.isBusy() ) { // || follower.getPose().getX() < 12) {
-                        pathState = 25;
-                    }
-                }
-                break;
-            case 25: // back up so specimen can be place
-                follower.followPath(autonp.move4b);
-                robot.liftWall();
-                pathState = 26;
-                pausetime.reset();
-                break;
-            case 26:
-                follower.update();
-
-                if (!follower.isBusy() && pausetime.seconds() > 2) {
-                    pathState = 30;
-                    pausetime.reset();
-                }
-                break;
-            case 30: // move forward to align
-                follower.followPath(autonp.move5);
-                pathState = 31;
-                pausetime.reset();
-                break;
-            case 31:
-                follower.update();
-                if (!follower.isBusy() && pausetime.seconds() > 1) {
                     pathState = 32;
+                    pausetime.reset();
                 }
                 break;
-            case 32: // move to wall to pick up
-                follower.followPath(autonp.move5b);
-                pausetime.reset();
-                pathState = 33;
+            case 32: // move to wall to pick up 2nd specimen
+                if (pausetime.seconds()>1) {
+                    follower.followPath(autonp.move5bh3);
+                    pausetime.reset();
+                    pathState = 33;
+                }
                 break;
-            case 33: //
+            case 33: // grab 2nd specimen
                 follower.update();
-                if (!follower.isBusy() || pausetime.seconds() > 1) {
+                if (!follower.isBusy() || pausetime.seconds() > 0.7) {
                     pathState = 34;
                 }
                 break;
@@ -236,11 +191,22 @@ public class CompetitionAutonRight extends OpMode {
                 break;
             case 40: // move back
                 if (pausetime.seconds() > 0) {
-                    follower.followPath(autonp.move6);
+                    follower.followPath(autonp.move6h31);
+                    pathState = 41;
+                }
+                break;
+            case 41: //
+                follower.update();
+                if (!follower.isBusy()) { // || follower.getPose().getX() > 13
+                    pathState = 42;
+                }
+                break;
+            case 42: // move back
+                if (pausetime.seconds() > 0) {
+                    follower.followPath(autonp.move6h32);
                     pathState = 44;
                 }
                 break;
-
             case 44: // move to bar
                 follower.update();
                 if (!follower.isBusy()) { // || follower.getPose().getX() > 13
@@ -248,8 +214,8 @@ public class CompetitionAutonRight extends OpMode {
                 }
                 break;
             case 46:
-                follower.followPath(autonp.move6b);
-                pathState = 48;
+                    follower.followPath(autonp.move6bh3);
+                    pathState = 48;
                 break;
             case 48: //
                 follower.update();
@@ -257,16 +223,16 @@ public class CompetitionAutonRight extends OpMode {
                     pathState = 50;
                 }
                 break;
-            case 50:
+            case 50: // move against bar
                 if (pausetime.seconds() > 0 ) {
-                    follower.followPath(autonp.move6c);
+                    follower.followPath(autonp.move6ch3);
                     pathState = 51;
                     pausetime.reset();
                 }
                 break;
-            case 51: // follow path to move specimen to bar
+            case 51: // follow path to move 2nd specimen to bar
                 follower.update();
-                if (!follower.isBusy()  || pausetime.seconds() > 0.4) {
+                if (!follower.isBusy() || pausetime.seconds() > 0.8) {
                     pathState = 52;
                 }
                 break;
@@ -285,35 +251,141 @@ public class CompetitionAutonRight extends OpMode {
                     pathState = 60;
                 }
                 break;
-            case 60:
-                follower.followPath(autonp.move7);
-                pathState = 61;
+            case 60: // move back for 3rd sample
+                    follower.followPath(autonp.move7h3);
+                    pathState = 61;
                 break;
-            case 61: // backup a little
+            case 61: //
                 follower.update();
                 if (!follower.isBusy()) {
                     pathState = 70;
                 }
                 break;
-            case 70: // park
-                robot.liftDown();
+            case 70: //
                 if (pausetime.seconds() > 0) {
-                    follower.followPath(autonp.move7b);
+                    follower.followPath(autonp.move7bh3);
                     pathState = 71;
+                    pausetime.reset();
                 }
                 break;
-            case 71: // follow path to park
+            case 71: // follow path to align with 3rd specimen
+                robot.liftWall();
                 follower.update();
                 if (!follower.isBusy()) {
+                    pausetime.reset();
+                    pathState = 80;
+                }
+                break;
+            case 80: // grab 3rd specimen
+                if (pausetime.seconds() > 0.7) {
+                    follower.followPath(autonp.move7ch3);
+                    pathState = 82;
+                    pausetime.reset();
+                }
+                break;
+            case 82: //
+                follower.update();
+                if (!follower.isBusy() || pausetime.seconds() > 1.2) {
+                    pathState = 84;
+                }
+                break;
+            case 84:
+                robot.clawClosed();
+                pausetime.reset();
+                pathState = 86;
+                break;
+            case 86:
+                if (pausetime.seconds() > 0.2) {
+                    robot.liftBar();
+                    pausetime.reset();
+                    pathState = 88;
+                }
+                break;
+            case 88: // move back
+                if (pausetime.seconds() > 0) {
+                    follower.followPath(autonp.move8h3);
+                    pathState = 90;
+                }
+                break;
+
+            case 90: // move to bar with 3rd specimen
+                follower.update();
+                if (!follower.isBusy()) { // || follower.getPose().getX() > 13
+                    pathState = 92;
+                }
+                break;
+            case 92:
+                follower.followPath(autonp.move8bh3);
+                pathState = 94;
+                break;
+            case 94: //
+                follower.update();
+                if (!follower.isBusy() ) {
+                    pathState = 96;
+                }
+                break;
+            case 96:
+                if (pausetime.seconds() > 0 ) {
+                    follower.followPath(autonp.move8ch3);
+                    pathState = 98;
+                    pausetime.reset();
+                }
+                break;
+            case 98: // follow path to move specimen to bar
+                follower.update();
+                if (!follower.isBusy()  || pausetime.seconds() > 0.4) {
                     pathState = 100;
                 }
                 break;
             case 100:
+                if (robot.liftHook()) {
+                    telemetryA.addLine("lift hook complete");
+                    telemetryA.update();
+                    pathState = 102;
+                    pausetime.reset();
+                }
+                break;
+            case 102:
+                robot.clawOpen();
+                if (pausetime.seconds() > 0.3) {
+                    pausetime.reset();
+                    pathState = 104;
+                }
+                break;
+            case 104:
+                follower.followPath(autonp.move9h3);
+                pathState = 106;
+                break;
+            case 106: // backup a little
+                follower.update();
+                if (!follower.isBusy()) {
+                    pathState = 108;
+                }
+                break;
+            case 108: // park
+                robot.liftDown();
+                if (pausetime.seconds() > 0) {
+                    follower.followPath(autonp.move9bh3);
+                    pathState = 110;
+                }
+                break;
+            case 110: // follow path to park
+                follower.update();
+                if (!follower.isBusy()) {
+                    pathState = 200;
+                }
+                break;
+            case 200:
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + pathState);
         }
         telemetryA.addData("going forward", forward);
         follower.telemetryDebug(telemetryA);
+    }
+
+    @Override
+    public void stop() {
+        follower.breakFollowing();
     }
 }

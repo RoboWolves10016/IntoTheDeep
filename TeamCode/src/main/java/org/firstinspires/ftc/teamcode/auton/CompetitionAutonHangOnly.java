@@ -163,7 +163,7 @@ public class CompetitionAutonHangOnly extends OpMode {
                 }
                 break;
             case 28: // lower the arm and start the spinner
-                robot.armDown();
+                robot.intakePos();
                 robot.spinIn();
                 if (pausetime.seconds() > 1) {
                     pathState = 29;
@@ -173,7 +173,7 @@ public class CompetitionAutonHangOnly extends OpMode {
             case 29:
                 if (pausetime.seconds() > 1.5 ) {
                     robot.spinOff();
-                    if (robot.armUp()) {
+                    if (robot.transferPos()) {
                         pathState = 32; // skip to move3b
                         pausetime.reset();
                     }
