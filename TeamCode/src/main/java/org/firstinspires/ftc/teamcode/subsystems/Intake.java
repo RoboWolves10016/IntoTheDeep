@@ -11,54 +11,51 @@ import org.firstinspires.ftc.teamcode.SimpleSubsystem;
 @Config
 public class Intake extends SimpleSubsystem {
 
-    private static final double IDLE_LOWER_POS = 0;
-    private static final double IDLE_UPPER_POS = 0;
+    private static final double IDLE_MAX_POS = 0.930;
+    private static final double IDLE_MINI_POS = 0.355;
 
-    private static final double TRANSFER_LOWER_POS = 0;
-    private static final double TRANSFER_UPPER_POS = 0;
+    private static final double TRANSFER_MAX_POS = 1.0;
+    private static final double TRANSFER_MINI_POS = 0.635;
 
-    private static final double PRE_INTAKE_LOWER_POS = 0;
-    private static final double PRE_INTAKE_UPPER_POS = 0;
+    private static final double PRE_INTAKE_MAX_POS = 0.415;
+    private static final double PRE_INTAKE_MINI_POS = 0.155;
 
-    private static final double INTAKE_LOWER_POS = 0;
-    private static final double INTAKE_UPPER_POS = 0;
+    private static final double INTAKE_MAX_POS = 0.25;
+    private static final double INTAKE_MINI_POS = 0.14;
 
-    private static final double INTAKE_SPEED = 1;
+    public static final double IDLE_SPEED = -0.1;
+    private static final double INTAKE_SPEED = -1;
     private static final double EXHAUST_SPEED = 1;
 
-    // This enum represents a state that the intake is commanded to be in
-    // The possible states are Transfer, Pre-Intake, and Intake
-    // We used an enum constructor so that we could link positions to each state
-    // These positions are accessible because the variables are public
+
     public enum IntakeState {
-        IDLE(IDLE_LOWER_POS, IDLE_UPPER_POS, 0),
-        TRANSFER(TRANSFER_LOWER_POS, TRANSFER_UPPER_POS, 0),
-        PRE_INTAKE(PRE_INTAKE_LOWER_POS, PRE_INTAKE_UPPER_POS, 0),
-        INTAKE(INTAKE_LOWER_POS, INTAKE_UPPER_POS, INTAKE_SPEED);
+        IDLE(IDLE_MAX_POS, IDLE_MINI_POS, IDLE_SPEED),
+        TRANSFER(TRANSFER_MAX_POS, TRANSFER_MINI_POS, IDLE_SPEED),
+        PRE_INTAKE(PRE_INTAKE_MAX_POS, PRE_INTAKE_MINI_POS, IDLE_SPEED),
+        INTAKE(INTAKE_MAX_POS, INTAKE_MINI_POS, INTAKE_SPEED);
 
         public final double lowerTarget;
         public final double upperTarget;
         public final double speed;
 
-        // Here's the aforementioned enum constructor
-        private IntakeState(double lowerTarget, double upperTarget, double intakeSpeed) {
+        IntakeState(double lowerTarget, double upperTarget, double intakeSpeed) {
             this.lowerTarget = lowerTarget;
             this.upperTarget = upperTarget;
             this.speed = intakeSpeed;
         }
     }
 
-    private final Servo lowerJoint;
-    private final Servo upperJoint;
+    private final Servo axonMax;
+    private final Servo axonMini;
     private final CRServo intake;
 
-    private IntakeState currentState = IntakeState.TRANSFER;
+    private IntakeState currentState = IntakeState.IDLE;
 
     private boolean exhaust = false;
 
     public Intake(HardwareMap hwMap) {
-        lowerJoint = hwMap.servo.get("axonmax");
-        upperJoint = hwMap.servo.get("axonmini");
+        axonMax = hwMap.servo.get("axonmax");
+        axonMini = hwMap.servo.get("axonmini");
         intake = hwMap.get(CRServo.class, "spinner");
     }
 
@@ -69,8 +66,8 @@ public class Intake extends SimpleSubsystem {
 
     @Override
     public void periodic() {
-        lowerJoint.setPosition(currentState.lowerTarget);
-        upperJoint.setPosition(currentState.upperTarget);
+        axonMax.setPosition(currentState.lowerTarget);
+        axonMini.setPosition(currentState.upperTarget);
         intake.setPower(currentState.speed);
         if(exhaust) {
             intake.setPower(EXHAUST_SPEED);
@@ -93,6 +90,17 @@ public class Intake extends SimpleSubsystem {
 
     public void transferPosition() {
         currentState = IntakeState.TRANSFER;
+    }
+
+    public void idlePosition() {
+        currentState = IntakeState.IDLE;
+    }
+    public void setExhaust(boolean exhaust) {
+        this.exhaust = exhaust;
+    }
+
+    public IntakeState getState() {
+        return currentState;
     }
 
 }

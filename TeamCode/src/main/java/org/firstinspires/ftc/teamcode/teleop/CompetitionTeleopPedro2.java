@@ -400,9 +400,9 @@ public class CompetitionTeleopPedro2 extends OpMode {
     }
 
     private void checkIntakeCollision() {
-        if(inTransfer) {
-            maxTarget = maxBasePos + 0.505;
-            miniTarget = miniBasePos + 0.265;
+        if (inTransfer) {
+            maxTarget = maxBasePos + 0.705; // 0.70
+            miniTarget = miniBasePos + 0.215; // .45        }
         }
     }
 }
