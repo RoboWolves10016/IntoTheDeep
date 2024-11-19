@@ -27,10 +27,13 @@ import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
  * @version 1.0, 3/12/2024
  */
 @Config
-@Autonomous (name = "Competition Auton Left2" , group = "Autonomous")
-public class CompetitionAutonLeft extends OpMode {
+@Autonomous (name = "Competition Auton Left Yellow 2" , group = "Autonomous")
+public class CompetitionAutonLeftYellow2 extends OpMode {
     AutonPathsLeft autonp = new AutonPathsLeft(this);
     RobotHardwareC robot = new RobotHardwareC(this);
+
+    static final int COMPLETE = -1, BEGIN_SUBSTATE = 10;
+    static final Double UNDUMP_TIME = 1.0, TRANSFER_TIME = 0.5, DROP_TIME = 0.5, CLEAR_BASKET_TIME = 1.5;
 
     private Telemetry telemetryA;
     public static double DISTANCE = 40;
@@ -39,12 +42,11 @@ public class CompetitionAutonLeft extends OpMode {
     private Follower follower;
 
     // TODO: adjust this for each auto
-    private final Pose startPose = new Pose(7.25, 89.25, Math.toRadians(180));
-
-    private int pathState;
+    private final Pose startPose = new Pose(7.25 - 0.71, 89.25 - 0.45, Math.toRadians(-90));
+ //   private final Pose startPose = new Pose(7.25, 89.25, Math.toRadians(180));
+    private int pathState, subPathState;
 
     private final ElapsedTime pausetime = new ElapsedTime();
-
 
     /**
      * This initializes the Follower and creates the forward and backward Paths. Additionally, this
@@ -61,9 +63,9 @@ public class CompetitionAutonLeft extends OpMode {
                 this);
         telemetryA.addLine("This is our first trial moves for Into The Deep competition.");
         telemetryA.update();
-        pathState = 1;
+        pathState = 101;
         follower.setStartingPose(startPose);
-        follower.followPath(autonp.move1);
+        follower.followPath(autonp.move1y2);
         robot.clawClosed();
         robot.undump();
         follower.setMaxPower(1);
@@ -78,221 +80,244 @@ public class CompetitionAutonLeft extends OpMode {
     @Override
     public void loop() {
         switch (pathState) {
-            case 1: // starts following the first path to score a sample on the bar wait for lift to be up before moving on
-                robot.idlePos();
+            case 101: // starts following the first path to the basket
                 robot.slideIn();
+                robot.clawOpen();
+                robot.idlePos();
+                robot.liftBasket();
                 follower.update();
-                if (robot.liftBar() && !follower.isBusy()) {
-                    pausetime.reset();
-                    pathState = 10;
+                if (!follower.isBusy()) {
+                    setPathState(10);;
+                    setSubPathState(BEGIN_SUBSTATE);
                 }
                 break;
-            case 10:
-                if (pausetime.seconds() > 0) {
-                    follower.followPath(autonp.move1b);
-                    pathState = 12;
-                }
+            case 10:  // In front of baskets - begin deposit sample process
+                dumpSample();
+                if (subPathState == COMPLETE) {setPathState(18);}
                 break;
-            case 12: // moves up against the bar
-                follower.update();
-                if (!follower.isBusy() || pausetime.seconds() > 0.4) {
-                    telemetryA.addLine("Going to lifthook");
-                    telemetryA.update();
-                    pathState = 14;
-                }
-
-                break;
-            case 14: // lowers lift to clip in hook
-                if (robot.liftHook()) {
-                    telemetryA.addLine("lift hook complete");
-                    telemetryA.update();
-                    pathState = 16;
-                    pausetime.reset();
-                }
-                break;
-            case 16: // open the claw
-                if (robot.clawOpen() && pausetime.seconds() > 0.2) {
-                    pathState = 18;
-                }
-                break;
-            case 18:  // move back and turn 90 deg
+//////////////////////// after 1st dump
+            case 18:  // move forward to eat 1st sample
                 if (pausetime.seconds() > 0.0) {
-                    follower.followPath(autonp.move2a);
-                    pathState = 20;
+                    robot.intakePos();
+                    robot.spinIn();
+                    follower.followPath(autonp.move2ay);
+                    setPathState(20);
                 }
                 break;
             case 20:
                 follower.update();
-                robot.liftDown();
                 robot.intakePos();
                 robot.spinIn();
+               // if (pausetime.seconds() > CLEAR_BASKET_TIME) {robot.liftDown();}
+                if (follower.getPose().getY() < 125) {robot.liftDown();}
                 if (!follower.isBusy()) {
-                    pathState = 21;
-                    pausetime.reset();
+                    robot.liftDown();
+                    setPathState(21);
                 }
                 break;
             case 21: // drive angled in towards the 1st sample
                 follower.followPath(autonp.move2b);
-                pathState = 22;
+                setPathState(22);;
                 break;
             case 22:
                 follower.update();
                 if (!follower.isBusy()) { //|| follower.getPose().getY() > 103
-                    pathState = 30;
+                    setPathState(30);
                 }
                 break;
             case 30: // move to the basket
                 //robot.spinOff();
                 robot.transferPos();
-                pausetime.reset();
                 follower.followPath(autonp.move3b);
-                pathState = 33;
+                setPathState(33);
                 break;
             case 33: // to basket
                 follower.update();
-                if (pausetime.seconds()>0.5) {
+                if (pausetime.seconds() > TRANSFER_TIME) {
                     robot.spinOut();
                 }
+                if (pausetime.seconds() > TRANSFER_TIME + DROP_TIME) {
+                    robot.spinOff();
+                    robot.idlePos();
+                    robot.liftBasket();
+                }
                 if (!follower.isBusy()) {
-                    pathState = 34;
+                    setSubPathState(BEGIN_SUBSTATE);
+                    setPathState(34);
                 }
                 break;
             case 34:
                 robot.spinOff();
                 robot.idlePos();
-                if (robot.liftBasket()) {
-                    telemetryA.addLine("lift basket complete");
-                    telemetryA.update();
-                    pathState = 36;
-                }
+                dumpSample();
+                if (subPathState == COMPLETE) {
+                    setSubPathState(BEGIN_SUBSTATE);
+                    setPathState(40);}
                 break;
-            case 36:
-                robot.dump();
-                pausetime.reset();
-                pathState = 38;
-                break;
-            case 38:
-                if (pausetime.seconds() > 1 ) {
-                    robot.undump();
-                    if (pausetime.seconds() > 0.02) {
-                        pathState = 40;
-                    }
-                }
-                break;
+//////////////////////// after 2nd dump
             case 40: // to 2nd sample
-               // robot.slideOut();
                 robot.intakePos();
                 robot.spinIn();
-                robot.liftDown();
                 follower.followPath(autonp.move4);
-                pathState = 44;
+                setPathState(44);
                 break;
 
             case 44:
                 follower.update();
+                if (pausetime.seconds() > CLEAR_BASKET_TIME) {robot.liftDown();}
                 if (!follower.isBusy()) {
-                    pathState = 46;
+                    robot.liftDown();
+                    setPathState(46);
                 }
                 break;
             case 46:
-                    robot.liftDown();
                     follower.followPath(autonp.move4a);
-                    pathState = 48;
+                    setPathState(48);
                 break;
             case 48: //
                 follower.update();
                 if (robot.liftDown() && !follower.isBusy()) {
-                    pausetime.reset();
-                    pathState = 50;
+                    setPathState(50);
                 }
                 break;
             case 50: // to basket
-             //   robot.spinOff();
                 robot.transferPos();
-                if (pausetime.seconds() > 0.6 ) {
-                    robot.spinOut();
-                    follower.followPath(autonp.move5);
-                    pathState = 52;
-                }
+                pausetime.reset();
+                follower.followPath(autonp.move5);
+                setPathState(52);
                 break;
             case 52: //
                 follower.update();
+                if (pausetime.seconds() > TRANSFER_TIME) {
+                    robot.spinOut();
+                }
+                if (pausetime.seconds() > TRANSFER_TIME + DROP_TIME) {
+                    robot.spinOff();
+                    robot.idlePos();
+                    robot.liftBasket();
+                }
                 if (!follower.isBusy()) {
-                    pathState = 54;
+                    setSubPathState(BEGIN_SUBSTATE);
+                    setPathState(54);
                 }
                 break;
             case 54:
                 robot.spinOff();
                 robot.idlePos();
-                if (robot.liftBasket()) {
-                    telemetryA.addLine("lift basket complete");
-                    telemetryA.update();
-                    pathState = 56;
+                dumpSample();
+                if (subPathState == COMPLETE) {
+                    setSubPathState(BEGIN_SUBSTATE);
+                    setPathState(60);
                 }
                 break;
-            case 56: // puke in basket
-                robot.dump();
-                pausetime.reset();
-                pathState = 58;
-                break;
-            case 58:
-                if (pausetime.seconds() > 1 ) {
-                    robot.undump();
-                    if (pausetime.seconds() > 0.02) {
-                        pathState = 60;
-                    }
-                }
-                break;
+//////////////////////// after 3rd dump
             case 60: // to 3rd spike mark
                 // robot.slideOut();
                 robot.intakePos();
                 robot.spinIn();
-                robot.liftDown();
                 follower.followPath(autonp.move6);
-                pathState = 64;
+                setPathState(64);
                 break;
 
             case 64:
                 follower.update();
+                if (pausetime.seconds() > CLEAR_BASKET_TIME) {robot.liftDown();}
                 if (!follower.isBusy()) {
-                    pathState = 66;
+                    robot.liftDown();
+                    setPathState(66);
                 }
                 break;
             case 66:
-                robot.liftDown();
                 follower.followPath(autonp.move6a);
-                pathState = 68;
+                setPathState(68);
                 break;
             case 68: // starts following the first path to score on the spike mark
                 follower.update();
                 if (robot.liftDown() && !follower.isBusy()) {
-                    pausetime.reset();
-                    pathState = 70;
+                    setPathState(70);
                 }
                 break;
             case 70: // to basket
               //  robot.spinOff();
                 robot.transferPos();
-                if (pausetime.seconds() > 0.3 ) {
-                    follower.followPath(autonp.move7);
-                    pathState = 72;
-                    pausetime.reset();
-                }
+                pausetime.reset();
+                follower.followPath(autonp.move7);
+                setPathState(72);
+                pausetime.reset();
                 break;
             case 72: //
                 follower.update();
-                if (pausetime.seconds() > 1) {
+                if (pausetime.seconds() > TRANSFER_TIME) {
                     robot.spinOut();
                 }
+                if (pausetime.seconds() > TRANSFER_TIME + DROP_TIME) {
+                    robot.spinOff();
+                    robot.idlePos();
+                    robot.liftBasket();
+                }
                 if (!follower.isBusy()) {
-                    pathState = 100;
+                    setSubPathState(BEGIN_SUBSTATE);
+                    setPathState(74);
                 }
                 break;
-
+            case 74:
+                robot.spinOff();
+                robot.idlePos();
+                dumpSample();
+                if (subPathState == COMPLETE) {
+                    setSubPathState(BEGIN_SUBSTATE);
+                    setPathState(80);
+                }
+                break;
+//////////////////////// after 4th dump
+            case 80:
+                follower.followPath(autonp.move8);
+                setPathState(82);  // was 68 ????
+                break;
+            case 82: // starts following the first path to score on the spike mark
+                follower.update();
+                if (pausetime.seconds() > CLEAR_BASKET_TIME) {robot.liftDown();}
+                if (!follower.isBusy()) {
+                    robot.liftDown();
+                    setPathState(100);
+                }
+                break;
             case 100:
                 break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + pathState);
         }
         telemetryA.addData("going forward", forward);
         follower.telemetryDebug(telemetryA);
+    }
+    void dumpSample() {
+        switch(subPathState) {
+            case BEGIN_SUBSTATE:
+                if (robot.liftBasket()) {
+                    telemetryA.addLine("lift basket complete");
+                    telemetryA.update();
+                    setSubPathState(12);
+                }
+                break;
+            case 12:
+                robot.dump();
+                pausetime.reset();
+                setSubPathState(14);
+                break;
+            case 14:
+                if (pausetime.seconds() > UNDUMP_TIME) {
+                    robot.undump();
+                    setSubPathState(COMPLETE);
+                }
+                break;
+        }
+    }
+    public void setPathState(int state) {
+        pathState = state;
+        pausetime.reset();
+    }
+    public void setSubPathState(int state) {
+        subPathState = state;
+        pausetime.reset();
     }
 }

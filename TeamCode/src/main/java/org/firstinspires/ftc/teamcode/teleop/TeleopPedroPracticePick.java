@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.hardware.RobotHardware2024_2;
+import org.firstinspires.ftc.teamcode.hardware.RobotHardware2024;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
 
@@ -18,7 +18,7 @@ public class TeleopPedroPracticePick extends OpMode {
 
     private Follower follower;
     private final Pose resetPose = new Pose(0, 0, Math.toRadians(0));
-    RobotHardware2024_2 robot = new RobotHardware2024_2(this);
+    RobotHardware2024 robot = new RobotHardware2024(this);
     DcMotorEx liftL, liftR;
     private double rightX, leftX, leftY;
     private double left2Y, right2Y;

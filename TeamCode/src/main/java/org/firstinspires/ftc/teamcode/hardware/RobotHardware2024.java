@@ -1,24 +1,17 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.TouchSensor;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
 public class RobotHardware2024 {
@@ -42,14 +35,14 @@ public class RobotHardware2024 {
     private DcMotor wheel3 = null;
     private DcMotor wheel4 = null;
 
-    public DcMotor slide = null;
     public DcMotor liftL = null;
     public DcMotor liftR = null;
-    public DcMotor slidewrist = null;
-    public Servo spinner = null;
     public Servo claw = null;
     public Servo dump = null;
     public Servo slideservo = null;
+    public Servo axonMax;
+    public Servo axonMini;
+    public CRServo spinner;
     public TouchSensor liftdown = null;
 
     ElapsedTime timer = new ElapsedTime();
@@ -73,38 +66,24 @@ public class RobotHardware2024 {
         wheel3  = myOpMode.hardwareMap.get(DcMotor.class, "wheel3");
         wheel4  = myOpMode.hardwareMap.get(DcMotor.class, "wheel4");
 
-        spinner = myOpMode.hardwareMap.get(Servo.class, "spinner");
+        spinner = myOpMode.hardwareMap.get(CRServo.class, "spinner");
         claw = myOpMode.hardwareMap.get(Servo.class, "claw");
         dump = myOpMode.hardwareMap.get(Servo.class, "dump");
         slideservo = myOpMode.hardwareMap.get(Servo.class, "slideservo");
-        slideservo.setPosition(0.08);
+        axonMax = myOpMode.hardwareMap.get(Servo.class, "axonmax");
+        axonMini = myOpMode.hardwareMap.get(Servo.class, "axonmini");
 
-        slide  = myOpMode.hardwareMap.get(DcMotor.class, "slide");
-        slidewrist  = myOpMode.hardwareMap.get(DcMotor.class, "slidewrist");
         liftL = myOpMode.hardwareMap.get(DcMotor.class, "liftL");
         liftR = myOpMode.hardwareMap.get(DcMotor.class, "liftR");
         liftdown = myOpMode.hardwareMap.get(TouchSensor.class, "liftdown");
 
-        slidewrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         liftL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        slide.setDirection(DcMotor.Direction.FORWARD);
         liftL.setDirection(DcMotor.Direction.REVERSE);
         liftR.setDirection(DcMotor.Direction.REVERSE);
-        slidewrist.setDirection(DcMotor.Direction.REVERSE);
 
-
-        slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slidewrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        slidewrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         wheel1.setDirection(DcMotor.Direction.REVERSE);

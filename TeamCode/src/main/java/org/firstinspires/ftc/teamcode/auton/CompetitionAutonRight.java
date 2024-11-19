@@ -133,7 +133,6 @@ public class CompetitionAutonRight extends OpMode {
                     telemetryA.update();
                     pathState = 14;
                 }
-
                 break;
             case 14:
                 if (robot.liftHook()) {
@@ -149,6 +148,7 @@ public class CompetitionAutonRight extends OpMode {
                     pathState = 18;
                 }
                 break;
+////////////////////// 1st sample hooked
             case 18: // move back behind the colored samples
                 if (pausetime.seconds() > 0.5) {
                     follower.followPath(move2);
@@ -179,11 +179,8 @@ public class CompetitionAutonRight extends OpMode {
                 break;
             case 24:
                 follower.update();
-                if (follower.getPose().getX() > 13) {backed = true;}
-                if (true) {
-                    if (!follower.isBusy() ) { // || follower.getPose().getX() < 12) {
-                        pathState = 25;
-                    }
+                if (!follower.isBusy() ) { // || follower.getPose().getX() < 12)
+                    pathState = 25;
                 }
                 break;
             case 25: // back up so specimen can be place

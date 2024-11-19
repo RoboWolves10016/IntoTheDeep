@@ -8,18 +8,18 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RobotHardwareC {
-
     static final double CLAWOPEN = 0.28, CLAWCLOSED = 0.49;
     static final double DUMPUP = 0.53, DUMPDOWN = 0.32;
-    static final double intakeMax = 0.03, intakeMini = 0.18; // was 0.08, 0.146
-    static final double transferMax = 0.83, transferMini = 0.67;
-    static final double idleMax = 0.70, idleMini = 0.45;
+    private double miniBasePos = 0.14, maxBasePos = 0.25;
+    double intakeMax = maxBasePos, intakeMini = miniBasePos; // was 0.08, 0.146
+    double transferMax = maxBasePos + 0.755, transferMini = miniBasePos + 0.495;
+    double idleMax = maxBasePos + 0.705, idleMini = miniBasePos + 0.215;
     static final int ARMUP = 0, ARMDOWN = -100;
     static final double SPININ = -1, SPINOUT = 1, SPINOFF = 0;
     static final double SLIDEOUT = 0.8, SLIDEIN = 0.176;
     //static final int LIFTBAR = 3050, LIFTHOOK = 2350, LIFTBASKET = 5100, LIFTDOWN = 0, LIFTWALL = 700, CLOSECOUNTS = 5;
-    static final int LIFTBAR = 1691, LIFTHOOK = 1303, LIFTBASKET = 2800, LIFTDOWN = 0, LIFTWALL = 388, CLOSECOUNTS = 5;
-    static final double DUMP = 0.49, UNDUMP = 0.04;
+    static final int LIFTBAR = 1691, LIFTHOOK = 1303, LIFTBASKET = 2800, LIFTDOWN = 0, LIFTWALL = 388, CLOSECOUNTS = 20;
+    static final double DUMP = 0.49, UNDUMP = 0.04; // was 0.49 0.04
 
     VoltageSensor battery;
 
@@ -121,7 +121,7 @@ public class RobotHardwareC {
         liftR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftL.setPower(0.9);
         liftR.setPower(0.9);
-        return ((liftL.getCurrentPosition() < LIFTDOWN + CLOSECOUNTS) && (liftL.getCurrentPosition() > LIFTDOWN - CLOSECOUNTS));
+        return ((liftL.getCurrentPosition() < LIFTDOWN + 50) && (liftL.getCurrentPosition() > LIFTDOWN - 50));
     }
     public boolean liftWall() {
         liftL.setTargetPosition(LIFTWALL);

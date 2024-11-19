@@ -6,15 +6,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.hardware.RobotHardware2024;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 
-@TeleOp(name = "Competition TeleOp Pedro", group = "Robot")
+@TeleOp(name = "Cal Dump", group = "Calibration")
 //@Disabled
-public class CompetitionTeleopPedro2 extends OpMode {
+public class CalDump extends OpMode {
 
     private Follower follower;
     private final Pose resetPose = new Pose(0, 0, Math.toRadians(0));
@@ -72,6 +72,7 @@ public class CompetitionTeleopPedro2 extends OpMode {
      * This initializes the drive motors as well as the Follower and motion Vectors.
      */
     @Override
+   // @Disabled
     public void init() {
         follower = new Follower(hardwareMap);
 //        intake = new Intake(hardwareMap);
@@ -137,8 +138,8 @@ public class CompetitionTeleopPedro2 extends OpMode {
 // Servo check
      //   if (gamepad1.dpad_up) {slidePos = slidePos + 0.01; robot.slideservo.setPosition(slidePos);}
     //    if (gamepad1.dpad_down) {slidePos = slidePos - 0.01;robot.slideservo.setPosition(slidePos);}
-           if (gamepad1.dpad_up) {dumpPos = dumpPos + 0.01; robot.dump.setPosition(dumpPos);}
-           if (gamepad1.dpad_down) {dumpPos = dumpPos - 0.01;robot.dump.setPosition(dumpPos);}
+           if (gamepad1.dpad_up) {dumpPos = dumpPos + 0.005; robot.dump.setPosition(dumpPos);}
+           if (gamepad1.dpad_down) {dumpPos = dumpPos - 0.005;robot.dump.setPosition(dumpPos);}
 // Claw
         if (gamepad2.a && !lasta) {
             if (clawPos > 0.41) {
@@ -154,9 +155,9 @@ public class CompetitionTeleopPedro2 extends OpMode {
         lasty = gamepad2.y;
         if (gamepad2.y) {
             robot.dump.setPosition(0.49); // dump
-            checkIntakeCollision();
+      //      checkIntakeCollision();
         } else {
-           robot.dump.setPosition(0.04); // undump
+      //     robot.dump.setPosition(0.04); // undump
         }
 
 // Eater and puke
