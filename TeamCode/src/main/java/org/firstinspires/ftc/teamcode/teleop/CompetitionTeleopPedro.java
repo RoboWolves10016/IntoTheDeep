@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.hardware.RobotHardware2024;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
@@ -14,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @TeleOp(name = "Competition TeleOp Pedro", group = "Robot")
 //@Disabled
-public class CompetitionTeleopPedro2 extends OpMode {
+public class CompetitionTeleopPedro extends OpMode {
 
     private Follower follower;
     private final Pose resetPose = new Pose(0, 0, Math.toRadians(0));
@@ -42,12 +43,16 @@ public class CompetitionTeleopPedro2 extends OpMode {
     boolean recalLift = false;
 
     private double miniBasePos = 0.14, maxBasePos = 0.25;
-    private double miniTarget = miniBasePos + 0.215;
-    private double maxTarget = maxBasePos + 0.705;
-    private final double slideHome = 0.07;
+    private double miniTarget = Constants.MINI_IDLE_POS;
+    private double maxTarget = Constants.MAX_IDLE_POS;
+    private double maxIncrementer = 0;
+    private double miniIncrementer = 0;
+
+    private final double slideHome = 0.06;
     private double slideTarget = slideHome; //was .176
     private double spinnerSpeed = 0;
-    private boolean gotoPre = false, inIntake = false;
+    private boolean goToPre = false, inIntake = false;
+    private boolean goToPre2 = false, inIntake2 = false;
 
     private boolean inTransfer = false;
 
@@ -75,13 +80,6 @@ public class CompetitionTeleopPedro2 extends OpMode {
     @Override
     public void init() {
         follower = new Follower(hardwareMap);
-//        intake = new Intake(hardwareMap);
-//        extendo = new Extendo(hardwareMap);
-//        lift = new Lift(hardwareMap);
-//
-//        CommandScheduler.getInstance().registerSubsystem(intake, extendo, lift);
-
-//        AnalogInput
 
         // initialize all the hardware, using the hardware class. See how clean and simple this is?
         robot.init();
@@ -166,17 +164,19 @@ public class CompetitionTeleopPedro2 extends OpMode {
         if (gamepad2.back) {
             spinnerSpeed = 0;
             if (gamepad2.right_stick_y > 0.02) {
-                miniTarget = miniTarget - 0.0004;
+                miniIncrementer -= 0.0004;
             }
             if (gamepad2.right_stick_y < -0.02) {
-                miniTarget = miniTarget + 0.0004;
+                miniIncrementer += 0.0004;
             }
             if (gamepad2.right_stick_x > 0.02) {
-                maxTarget = maxTarget - 0.0004;
+                maxIncrementer -= 0.0004;
             }
             if (gamepad2.right_stick_x < -0.02) {
-                maxTarget = maxTarget + 0.0004;
+                maxIncrementer += 0.0004;
             }
+            maxTarget = Constants.MAX_INTAKE_POS + maxIncrementer;
+            miniTarget = Constants.MINI_INTAKE_POS + miniIncrementer;
         } else {
             if (last2Back && miniTarget < 0.3 && maxTarget < 0.3) {
                 miniBasePos = miniTarget;
@@ -185,46 +185,80 @@ public class CompetitionTeleopPedro2 extends OpMode {
         }
         last2Back = gamepad2.back;
         // PreIntake
-        if ((gamepad2.right_bumper || gotoPre) && !gamepad2.back) {
-            maxTarget = maxBasePos + 0.165; // was 0.23
-            miniTarget = miniBasePos + 0.015; // was 0.05 .146
-            gotoPre = false;
+        if ((gamepad2.right_bumper || goToPre) && !gamepad2.back) {
+            maxTarget = Constants.MAX_PRE_INTAKE_POS + maxIncrementer;
+            miniTarget = Constants.MINI_PRE_INTAKE_POS + miniIncrementer;
+            goToPre = false;
             inTransfer = false;
         }
 
         // Intake
         if (gamepad2.right_trigger > 0.02) {
-            maxTarget = maxBasePos; // was 0.21
-            miniTarget = miniBasePos; // was 0.144  0.18 0.155  175
-            if(!gamepad2.b) {
-                spinnerSpeed = -1;
+            maxTarget = Constants.MAX_INTAKE_POS + maxIncrementer;
+            miniTarget = Constants.MINI_INTAKE_POS + miniIncrementer;
+            if (!gamepad2.b) {
+                spinnerSpeed = Constants.INTAKE_SPEED;
             }
             inIntake = true;
             inTransfer = false;
+
+            inIntake2 = false;
+
         } else if (inIntake) {
-            gotoPre = true;
+            goToPre = true;
             inIntake = false;
+
+            goToPre2 = false;
         }
+
+        // Pre-Peck Intake
+        if (goToPre2 && !gamepad2.back) {
+            maxTarget = Constants.MAX_PRE_PECK_POS + maxIncrementer;
+            miniTarget = Constants.MINI_PRE_PECK_POS + miniIncrementer;
+            goToPre2 = false;
+            inTransfer = false;
+        }
+        // Peck Intake
+        if (gamepad2.left_trigger > 0.02) {
+            maxTarget = Constants.MAX_PECK_POS + maxIncrementer;
+            miniTarget = Constants.MINI_PECK_POS + miniIncrementer;
+            if (!gamepad2.b) {
+                spinnerSpeed = Constants.INTAKE_SPEED;
+            }
+            inIntake2 = true;
+            inTransfer = false;
+
+            inIntake = false;
+
+        } else if (inIntake2) {
+            goToPre2 = true;
+            inIntake2 = false;
+
+            goToPre = false;
+        }
+
         // Transfer
         if (gamepad2.left_bumper) {
-            maxTarget = maxBasePos + 0.755; // was .083
-            miniTarget = miniBasePos + 0.495; // 0.67
-            slideTarget = slideHome; // make sure slides are all the way in
+            maxTarget = Constants.MAX_TRANSFER_POS + maxIncrementer;
+            miniTarget = Constants.MINI_TRANSFER_POS + miniIncrementer;
+            slideTarget = slideHome;
             inTransfer = true;
         }
         // Idle
         if (gamepad2.left_trigger > 0.02) {
-            maxTarget = maxBasePos + 0.705; // 0.70
-            miniTarget = miniBasePos + 0.215; // .45
+//            maxTarget = Constants.MAX_IDLE_POS + maxIncrementer;
+//            miniTarget = Constants.MINI_IDLE_POS + miniIncrementer;
+            maxTarget = Constants.MAX_PECK_POS + maxIncrementer;
+            miniTarget = Constants.MINI_PECK_POS + miniIncrementer;
             inTransfer = false;
         }
 
         // Puke
         if(gamepad2.b) {
-            spinnerSpeed = 1;
+            spinnerSpeed = Constants.EXHAUST_SPEED;
         }
 
-        if(!gamepad2.b && gamepad2.right_trigger <= 0.02) {
+        if(!gamepad2.b && gamepad2.right_trigger <= 0.02 && gamepad2.left_trigger <= 0.02) {
             spinnerSpeed = 0;
         }
         robot.axonMax.setPosition(maxTarget);
@@ -239,17 +273,7 @@ public class CompetitionTeleopPedro2 extends OpMode {
             slideTarget = slideTarget - 0.03 * gamepad2.right_stick_y;
         }
         robot.slideservo.setPosition(slideTarget);
-     /*   if (gamepad2.left_bumper&& !lastlbump) {
-            if (slidePos > 0.53) {
-                robot.slideservo.setPosition(0.08);
-                slidePos = robot.slideservo.getPosition();
-            } else {
-                robot.slideservo.setPosition(0.85);
-                slidePos = robot.slideservo.getPosition();
-            }
-        }
-        lastlbump = gamepad2.left_bumper;
-*/
+
 // Lift
         if (gamepad2.right_stick_button) {
             recalLift = true;
@@ -268,29 +292,33 @@ public class CompetitionTeleopPedro2 extends OpMode {
         if (gamepad2.dpad_up && !lastdpadup) { // Lift Bar
             autoLift = true;
             autoHeight = 1354;
+//            checkIntakeCollision();
         }
         lastdpadup = gamepad2.dpad_up;
 
         if (gamepad2.dpad_down && !lastdpaddown) { // Lift Hook
             autoLift = true;
             autoHeight = 1055;
+//            checkIntakeCollision();
         }
         lastdpaddown = gamepad2.dpad_down;
 
         if (gamepad2.dpad_left && !lastdpadleft) { // Lift Wall
             autoLift = true;
             autoHeight = 330; // 305
+//            checkIntakeCollision();
         }
         lastdpadleft = gamepad2.dpad_left;
 
         if (gamepad2.dpad_right && !lastdpadright) { // Lift Basket
             autoLift = true;
             autoHeight = 2230;
-            checkIntakeCollision();
+//            checkIntakeCollision();
         }
         lastdpadright = gamepad2.dpad_right;
 
         if (autoLift) {
+            checkIntakeCollision();
             robot.liftL.setTargetPosition(autoHeight);
             robot.liftL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             robot.liftL.setPower(.99);
@@ -305,6 +333,7 @@ public class CompetitionTeleopPedro2 extends OpMode {
             }
         }
         if ((left2Y > 0.02 && liftLCounts < liftMaxPos) || (left2Y < -0.02 && liftLCounts > liftMinPos)) {
+            checkIntakeCollision();
             autoLift = false;
             robot.liftR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             robot.liftL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -313,7 +342,6 @@ public class CompetitionTeleopPedro2 extends OpMode {
             // never set the hold target to a value below 0
             liftLCounts = Math.max(robot.liftL.getCurrentPosition(), 10);
             liftRCounts = Math.max(robot.liftR.getCurrentPosition(), 10);
-            checkIntakeCollision();
         } else if (!autoLift && !recalLift) {
             robot.liftL.setTargetPosition(liftLCounts);
             robot.liftL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -349,7 +377,8 @@ public class CompetitionTeleopPedro2 extends OpMode {
         telemetry.addData("x, y, h: ", "%.2f, %.2f, %.2f",
                 follower.getPose().getX(), follower.getPose().getY(), Math.toDegrees(follower.getPose().getHeading()));
         telemetry.addData("-", "-------");
-        telemetry.addData("mini , max: ", "%.2f, %.2f", miniTarget, maxTarget);
+        telemetry.addData("Targets: mini , max: ", "%.4f, %.4f", miniTarget, maxTarget);
+        telemetry.addData("Incrementers: mini , max: ", "%.4f, %.4f", miniIncrementer, maxIncrementer);
         telemetry.addData("-", "-------");
         telemetry.addData("Drive Power, Side Power, Spin Power", "%.2f, %.2f, %.2f", leftY, leftY, rightX);
 
@@ -403,8 +432,8 @@ public class CompetitionTeleopPedro2 extends OpMode {
 
     private void checkIntakeCollision() {
         if (inTransfer) {
-            maxTarget = maxBasePos + 0.705; // 0.70
-            miniTarget = miniBasePos + 0.215; // .45        }
+            maxTarget = Constants.MAX_IDLE_POS + maxIncrementer;
+            miniTarget = Constants.MINI_IDLE_POS + miniIncrementer;
         }
     }
 }
