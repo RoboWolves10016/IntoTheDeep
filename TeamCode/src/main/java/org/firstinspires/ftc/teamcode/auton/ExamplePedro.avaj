@@ -164,7 +164,14 @@ public class BlueLeftInnerAuto extends OpMode {
                 break;
         }
         scoreSpikeMarkMidToSpikeDistance = MathFunctions.distance(spikeMarkGoalPose, scoreSpikeMarkMidPoint);
-        scoreSpikeMark = new Path(new BezierCurve(new Point(startPose), scoreSpikeMarkMidPoint, new Point(spikeMarkGoalPose.getX() + MathFunctions.getSign(scoreSpikeMarkMidPoint.getX() - spikeMarkGoalPose.getX()) * Math.abs(scoreSpikeMarkMidPoint.getX() - spikeMarkGoalPose.getX()) * ROBOT_FRONT_LENGTH / scoreSpikeMarkMidToSpikeDistance, spikeMarkGoalPose.getY() + MathFunctions.getSign(scoreSpikeMarkMidPoint.getY() - spikeMarkGoalPose.getY()) * Math.abs(scoreSpikeMarkMidPoint.getY() - spikeMarkGoalPose.getY()) * ROBOT_FRONT_LENGTH / scoreSpikeMarkMidToSpikeDistance, Point.CARTESIAN)));
+        scoreSpikeMark = new Path(new BezierCurve(
+                new Point(startPose), scoreSpikeMarkMidPoint, 
+                new Point(spikeMarkGoalPose.getX() + MathFunctions.getSign(scoreSpikeMarkMidPoint.getX() - 
+                        spikeMarkGoalPose.getX()) * Math.abs(scoreSpikeMarkMidPoint.getX() - 
+                        spikeMarkGoalPose.getX()) * ROBOT_FRONT_LENGTH / scoreSpikeMarkMidToSpikeDistance, 
+                        spikeMarkGoalPose.getY() + MathFunctions.getSign(scoreSpikeMarkMidPoint.getY() -
+                                spikeMarkGoalPose.getY()) * Math.abs(scoreSpikeMarkMidPoint.getY() - 
+                                spikeMarkGoalPose.getY()) * ROBOT_FRONT_LENGTH / scoreSpikeMarkMidToSpikeDistance, Point.CARTESIAN)));
         scoreSpikeMark.setConstantHeadingInterpolation(startPose.getHeading());
         scoreSpikeMark.setPathEndTimeoutConstraint(3);
 

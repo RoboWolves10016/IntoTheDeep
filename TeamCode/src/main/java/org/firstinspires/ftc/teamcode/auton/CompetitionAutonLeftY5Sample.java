@@ -5,10 +5,11 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.auton.paths.AutonPathsLeft;
+import org.firstinspires.ftc.teamcode.auton.paths.AutonPathsLeft5Sample;
 import org.firstinspires.ftc.teamcode.hardware.RobotHardwareC;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
@@ -27,13 +28,16 @@ import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
  * @version 1.0, 3/12/2024
  */
 @Config
-@Autonomous (name = "Competition Auton Left Yellow 2" , group = "Autonomous")
-public class CompetitionAutonLeftYellow2 extends OpMode {
-    AutonPathsLeft autonp = new AutonPathsLeft(this);
+@Autonomous (name = "Competition Auton Left 5 Sample" , group = "Autonomous")
+public class CompetitionAutonLeftY5Sample extends OpMode {
+    AutonPathsLeft5Sample autonp = new AutonPathsLeft5Sample(this);
     RobotHardwareC robot = new RobotHardwareC(this);
 
     static final int COMPLETE = -1, BEGIN_SUBSTATE = 10;
-    static final Double UNDUMP_TIME = 1.0, TRANSFER_TIME = 0.5, DROP_TIME = 0.5, CLEAR_BASKET_TIME = 1.5;
+    static final Double UNDUMP_TIME = 0.6, TRANSFER_TIME = 0.5, DROP_TIME = 0.5, CLEAR_BASKET_TIME = 1.5;
+    static final int START_DUMP_HEIGHT = 1000;
+    static final int START_DUMP_DIST = 110;
+    boolean firstDump = true;
 
     private Telemetry telemetryA;
     public static double DISTANCE = 40;
@@ -42,7 +46,7 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
     private Follower follower;
 
     // TODO: adjust this for each auto
-    private final Pose startPose = new Pose(7.25 - 0.71, 89.25 - 0.45, Math.toRadians(-90));
+    private final Pose startPose = new Pose(7.25 - 0.21, 89.25, Math.toRadians(-90));
  //   private final Pose startPose = new Pose(7.25, 89.25, Math.toRadians(180));
     private int pathState, subPathState;
 
@@ -63,9 +67,9 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 this);
         telemetryA.addLine("This is our first trial moves for Into The Deep competition.");
         telemetryA.update();
-        pathState = 101;
+        pathState = 5;
         follower.setStartingPose(startPose);
-        follower.followPath(autonp.move1y2);
+        follower.followPath(autonp.move1);
         robot.clawClosed();
         robot.undump();
         follower.setMaxPower(1);
@@ -76,17 +80,33 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
     /**
      * This runs the OpMode, updating the Follower as well as printing out the debug statements to
      * the Telemetry, as well as the FTC Dashboard.
+     *  5 1st sample
+     *  18-33 2nd sample
+     *  40-52 3rd sample
+     *  60-72 4th sample
+     *  75-78 5th sample
      */
     @Override
     public void loop() {
         switch (pathState) {
-            case 101: // starts following the first path to the basket
+            case 5: // starts following the first path to the basket
                 robot.slideIn();
                 robot.clawOpen();
                 robot.idlePos();
-                robot.liftBasket();
+                if (robot.liftL.getCurrentPosition() < robot.LIFTBASKET) {
+                    robot.liftL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    robot.liftR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    robot.liftL.setPower(0.99);
+                    robot.liftR.setPower(0.99);
+                    if (robot.liftL.getCurrentPosition() > START_DUMP_HEIGHT) {
+                        robot.dump();
+                    }
+                } else {
+                    robot.liftBasket();
+                }
                 follower.update();
                 if (!follower.isBusy()) {
+
                     setPathState(10);;
                     setSubPathState(BEGIN_SUBSTATE);
                 }
@@ -100,7 +120,7 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 if (pausetime.seconds() > 0.0) {
                     robot.intakePos();
                     robot.spinIn();
-                    follower.followPath(autonp.move2ay);
+                    follower.followPath(autonp.move2a);
                     setPathState(20);
                 }
                 break;
@@ -117,7 +137,7 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 break;
             case 21: // drive angled in towards the 1st sample
                 follower.followPath(autonp.move2b);
-                setPathState(22);;
+                setPathState(22);
                 break;
             case 22:
                 follower.update();
@@ -128,7 +148,7 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
             case 30: // move to the basket
                 //robot.spinOff();
                 robot.transferPos();
-                follower.followPath(autonp.move3b);
+                follower.followPath(autonp.move3);
                 setPathState(33);
                 break;
             case 33: // to basket
@@ -139,7 +159,14 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 if (pausetime.seconds() > TRANSFER_TIME + DROP_TIME) {
                     robot.spinOff();
                     robot.idlePos();
-                    robot.liftBasket();
+                    if (robot.liftL.getCurrentPosition() < robot.LIFTBASKET) {
+                        robot.liftL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        robot.liftR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        robot.liftL.setPower(0.99);
+                        robot.liftR.setPower(0.99);
+                    } else {
+                        robot.liftBasket();
+                    }
                 }
                 if (!follower.isBusy()) {
                     setSubPathState(BEGIN_SUBSTATE);
@@ -158,7 +185,7 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
             case 40: // to 2nd sample
                 robot.intakePos();
                 robot.spinIn();
-                follower.followPath(autonp.move4);
+                follower.followPath(autonp.move4a);
                 setPathState(44);
                 break;
 
@@ -171,7 +198,7 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 }
                 break;
             case 46:
-                    follower.followPath(autonp.move4a);
+                    follower.followPath(autonp.move4b);
                     setPathState(48);
                 break;
             case 48: //
@@ -194,7 +221,14 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 if (pausetime.seconds() > TRANSFER_TIME + DROP_TIME) {
                     robot.spinOff();
                     robot.idlePos();
-                    robot.liftBasket();
+                    if (robot.liftL.getCurrentPosition() < robot.LIFTBASKET) {
+                        robot.liftL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        robot.liftR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        robot.liftL.setPower(0.99);
+                        robot.liftR.setPower(0.99);
+                    } else {
+                        robot.liftBasket();
+                    }
                 }
                 if (!follower.isBusy()) {
                     setSubPathState(BEGIN_SUBSTATE);
@@ -215,7 +249,7 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 // robot.slideOut();
                 robot.intakePos();
                 robot.spinIn();
-                follower.followPath(autonp.move6);
+                follower.followPath(autonp.move6a);
                 setPathState(64);
                 break;
 
@@ -228,7 +262,7 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 }
                 break;
             case 66:
-                follower.followPath(autonp.move6a);
+                follower.followPath(autonp.move6b);
                 setPathState(68);
                 break;
             case 68: // starts following the first path to score on the spike mark
@@ -253,7 +287,14 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 if (pausetime.seconds() > TRANSFER_TIME + DROP_TIME) {
                     robot.spinOff();
                     robot.idlePos();
-                    robot.liftBasket();
+                    if (robot.liftL.getCurrentPosition() < robot.LIFTBASKET) {
+                        robot.liftL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        robot.liftR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        robot.liftL.setPower(0.99);
+                        robot.liftR.setPower(0.99);
+                    } else {
+                        robot.liftBasket();
+                    }
                 }
                 if (!follower.isBusy()) {
                     setSubPathState(BEGIN_SUBSTATE);
@@ -266,15 +307,85 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 dumpSample();
                 if (subPathState == COMPLETE) {
                     setSubPathState(BEGIN_SUBSTATE);
-                    setPathState(80);
+                    setPathState(75);
                 }
                 break;
-//////////////////////// after 4th dump
-            case 80:
-                follower.followPath(autonp.move8);
-                setPathState(82);  // was 68 ????
+            //////////////////////// after 4th dump
+            case 75:
+                // move to other side of field
+                follower.followPath(autonp.move8a);
+                setPathState(76);
                 break;
-            case 82: // starts following the first path to score on the spike mark
+            case 76:
+            // pickup sample
+                follower.update();
+                robot.intakePos();
+                robot.spinIn();
+                if (pausetime.seconds() > CLEAR_BASKET_TIME) {robot.liftDown();}
+                if (!follower.isBusy()) {
+                    robot.liftDown();
+                    setPathState(77);
+                }
+                break;
+            case 77:
+                // move to other side of field
+                follower.followPath(autonp.move8b);
+                setPathState(78);
+                break;
+            case 78:
+                // pickup sample
+                follower.update();
+                if (!follower.isBusy()) {
+                    setPathState(79);
+                }
+                break;
+           // move back to basket and drop sample in bucket and start lifting
+           /////////////////////////
+            case 79: // to basket
+                robot.transferPos();
+                pausetime.reset();
+                follower.followPath(autonp.move9);
+                setPathState(80);
+                break;
+            case 80: //
+                follower.update();
+                if (pausetime.seconds() > TRANSFER_TIME) {
+                    robot.spinOut();
+                }
+                if (pausetime.seconds() > TRANSFER_TIME + DROP_TIME) {
+                    robot.spinOff();
+                    robot.idlePos();
+                    if (robot.liftL.getCurrentPosition() < robot.LIFTBASKET) {
+                        robot.liftL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        robot.liftR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        robot.liftL.setPower(0.99);
+                        robot.liftR.setPower(0.99);
+                    } else {
+                        robot.liftBasket();
+                    }
+                }
+                if (follower.getPose().getY() > START_DUMP_DIST) {
+                    robot.dump();
+                }
+                if (!follower.isBusy()) {
+                    setSubPathState(BEGIN_SUBSTATE);
+                    setPathState(86);
+                }
+                break;
+            case 86:
+                robot.spinOff();
+                robot.idlePos();
+                dumpSample();
+                if (subPathState == COMPLETE) {
+                    setSubPathState(BEGIN_SUBSTATE);
+                    setPathState(88);
+                }
+                break;
+            case 88:
+                follower.followPath(autonp.move10);
+                setPathState(90);  // was 68 ????
+                break;
+            case 90: // starts following the first path to score on the spike mark
                 follower.update();
                 if (pausetime.seconds() > CLEAR_BASKET_TIME) {robot.liftDown();}
                 if (!follower.isBusy()) {
@@ -293,7 +404,17 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
     void dumpSample() {
         switch(subPathState) {
             case BEGIN_SUBSTATE:
-                if (robot.liftBasket()) {
+                if (robot.liftL.getCurrentPosition() < robot.LIFTBASKET) {
+                    robot.liftL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    robot.liftR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    robot.liftL.setPower(0.99);
+                    robot.liftR.setPower(0.99);
+                } else {
+                    robot.liftBasket();
+                }
+                if (robot.liftL.getCurrentPosition() > START_DUMP_HEIGHT) {
+                    robot.dump();
+                    robot.liftBasket();
                     telemetryA.addLine("lift basket complete");
                     telemetryA.update();
                     setSubPathState(12);
@@ -301,11 +422,11 @@ public class CompetitionAutonLeftYellow2 extends OpMode {
                 break;
             case 12:
                 robot.dump();
-                pausetime.reset();
                 setSubPathState(14);
                 break;
             case 14:
-                if (pausetime.seconds() > UNDUMP_TIME) {
+                if (pausetime.seconds() > UNDUMP_TIME || firstDump) {
+                    firstDump = false;
                     robot.undump();
                     setSubPathState(COMPLETE);
                 }

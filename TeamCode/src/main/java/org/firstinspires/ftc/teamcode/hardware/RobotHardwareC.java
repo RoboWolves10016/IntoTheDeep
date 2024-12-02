@@ -14,11 +14,13 @@ public class RobotHardwareC {
     double intakeMax = maxBasePos, intakeMini = miniBasePos; // was 0.08, 0.146
     double transferMax = maxBasePos + 0.755, transferMini = miniBasePos + 0.495;
     double idleMax = maxBasePos + 0.705, idleMini = miniBasePos + 0.215;
+    double pushMini = 0.17, pushMax = 0.20, liftMini = 0.31, liftMax = 0.40;
     static final int ARMUP = 0, ARMDOWN = -100;
     static final double SPININ = -1, SPINOUT = 1, SPINOFF = 0;
     static final double SLIDEOUT = 0.8, SLIDEIN = 0.176;
     //static final int LIFTBAR = 3050, LIFTHOOK = 2350, LIFTBASKET = 5100, LIFTDOWN = 0, LIFTWALL = 700, CLOSECOUNTS = 5;
-    static final int LIFTBAR = 1691, LIFTHOOK = 1303, LIFTBASKET = 2800, LIFTDOWN = 0, LIFTWALL = 388, CLOSECOUNTS = 20;
+    // public final int LIFTBAR = 1691, LIFTHOOK = 1303, LIFTBASKET = 2800, LIFTDOWN = 0, LIFTWALL = 388, CLOSECOUNTS = 20;
+    public final int LIFTBAR = 1354, LIFTHOOK = 1055, LIFTBASKET = 2230, LIFTDOWN = 0, LIFTWALL = 297, CLOSECOUNTS = 20;
     static final double DUMP = 0.49, UNDUMP = 0.04; // was 0.49 0.04
 
     VoltageSensor battery;
@@ -100,6 +102,16 @@ public class RobotHardwareC {
         axonMini.setPosition(idleMini);
         return (true);
     }
+    public boolean pushPos() {
+        axonMax.setPosition(pushMax);
+        axonMini.setPosition(pushMini);
+        return (true);
+    }
+    public boolean liftPos() {
+        axonMax.setPosition(liftMax);
+        axonMini.setPosition(liftMini);
+        return (true);
+    }
     public void spinIn() {spinner.setPower(SPININ);}
     public void spinOut() {
         spinner.setPower(SPINOUT);
@@ -110,17 +122,14 @@ public class RobotHardwareC {
     public void slideOut() {
         slideservo.setPosition(SLIDEOUT);
     }
-    public void slideIn() {
-        slideservo.setPosition(SLIDEIN);
-
-    }
+    public void slideIn() {slideservo.setPosition(SLIDEIN);    }
     public boolean liftDown() {
         liftL.setTargetPosition(LIFTDOWN);
         liftR.setTargetPosition(LIFTDOWN);
         liftL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        liftL.setPower(0.9);
-        liftR.setPower(0.9);
+        liftL.setPower(0.99);
+        liftR.setPower(0.99);
         return ((liftL.getCurrentPosition() < LIFTDOWN + 50) && (liftL.getCurrentPosition() > LIFTDOWN - 50));
     }
     public boolean liftWall() {
@@ -128,8 +137,8 @@ public class RobotHardwareC {
         liftR.setTargetPosition(LIFTWALL);
         liftL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        liftL.setPower(0.9);
-        liftR.setPower(0.9);
+        liftL.setPower(0.99);
+        liftR.setPower(0.99);
         return ((liftL.getCurrentPosition() < LIFTDOWN + CLOSECOUNTS) && (liftL.getCurrentPosition() > LIFTDOWN - CLOSECOUNTS));
     }
     public boolean liftBar() {
@@ -137,8 +146,8 @@ public class RobotHardwareC {
         liftR.setTargetPosition(LIFTBAR);
         liftL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        liftL.setPower(0.9);
-        liftR.setPower(0.9);
+        liftL.setPower(0.99);
+        liftR.setPower(0.99);
 
         return ((liftL.getCurrentPosition() < (LIFTBAR + CLOSECOUNTS)) && (liftL.getCurrentPosition() > (LIFTBAR - CLOSECOUNTS)));
     }
@@ -157,8 +166,8 @@ public class RobotHardwareC {
         liftR.setTargetPosition(LIFTBASKET);
         liftL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        liftL.setPower(0.9);
-        liftR.setPower(0.9);
+        liftL.setPower(0.99);
+        liftR.setPower(0.99);
 
         return ((liftL.getCurrentPosition() < LIFTBASKET + CLOSECOUNTS) && (liftL.getCurrentPosition() > LIFTBASKET - CLOSECOUNTS));
     }

@@ -25,7 +25,7 @@ public class CompetitionTeleopPedro2 extends OpMode {
     private double mtrPwrPct = 1;
 
     double slideMaxPos = 5000, slideMinPos = 0;
-    double liftMaxPos = 2800, liftMinPos = 0;
+    double liftMaxPos = 2242, liftMinPos = 20;
     double clawPos=0, dumpPos = 0, slidePos = 0;
     int slidewristMaxPos = 5000;
     int slidewristMinPos = 0;
@@ -44,7 +44,8 @@ public class CompetitionTeleopPedro2 extends OpMode {
     private double miniBasePos = 0.14, maxBasePos = 0.25;
     private double miniTarget = miniBasePos + 0.215;
     private double maxTarget = maxBasePos + 0.705;
-    private double slideTarget = 0.176;
+    private final double slideHome = 0.07;
+    private double slideTarget = slideHome; //was .176
     private double spinnerSpeed = 0;
     private boolean gotoPre = false, inIntake = false;
 
@@ -130,6 +131,7 @@ public class CompetitionTeleopPedro2 extends OpMode {
         }
         if (gamepad1.back) {
             follower.setPose(resetPose);
+            follower.resetOffset();
         }
         follower.update();
 //        CommandScheduler.getInstance().run();
@@ -207,7 +209,7 @@ public class CompetitionTeleopPedro2 extends OpMode {
         if (gamepad2.left_bumper) {
             maxTarget = maxBasePos + 0.755; // was .083
             miniTarget = miniBasePos + 0.495; // 0.67
-            slideTarget = 0.176; // make sure slides are all the way in
+            slideTarget = slideHome; // make sure slides are all the way in
             inTransfer = true;
         }
         // Idle
@@ -231,10 +233,10 @@ public class CompetitionTeleopPedro2 extends OpMode {
 
 // Slide
         if (gamepad2.right_stick_y < -0.02 && slideTarget <= 0.8 && !gamepad2.back ) {
-            slideTarget = slideTarget + 0.03;
+            slideTarget = slideTarget - 0.03 * gamepad2.right_stick_y;
         }
-        if (gamepad2.right_stick_y > 0.02 && slideTarget >= 0.176 && !gamepad2.back) {
-            slideTarget = slideTarget - 0.03;
+        if (gamepad2.right_stick_y > 0.02 && slideTarget >= slideHome && !gamepad2.back) {
+            slideTarget = slideTarget - 0.03 * gamepad2.right_stick_y;
         }
         robot.slideservo.setPosition(slideTarget);
      /*   if (gamepad2.left_bumper&& !lastlbump) {
@@ -256,7 +258,7 @@ public class CompetitionTeleopPedro2 extends OpMode {
                 robot.liftR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             } else {
                 robot.liftL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                robot.liftL.setPower(-0.8);
+                robot.liftL.setPower(-0.4);
             }
         } else if (recalLift) {
             robot.liftL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -265,25 +267,25 @@ public class CompetitionTeleopPedro2 extends OpMode {
         }
         if (gamepad2.dpad_up && !lastdpadup) { // Lift Bar
             autoLift = true;
-            autoHeight = 1691;
+            autoHeight = 1354;
         }
         lastdpadup = gamepad2.dpad_up;
 
         if (gamepad2.dpad_down && !lastdpaddown) { // Lift Hook
             autoLift = true;
-            autoHeight = 1330;
+            autoHeight = 1055;
         }
         lastdpaddown = gamepad2.dpad_down;
 
         if (gamepad2.dpad_left && !lastdpadleft) { // Lift Wall
             autoLift = true;
-            autoHeight = 388;
+            autoHeight = 330; // 305
         }
         lastdpadleft = gamepad2.dpad_left;
 
         if (gamepad2.dpad_right && !lastdpadright) { // Lift Basket
             autoLift = true;
-            autoHeight = 2800;
+            autoHeight = 2230;
             checkIntakeCollision();
         }
         lastdpadright = gamepad2.dpad_right;
@@ -309,8 +311,8 @@ public class CompetitionTeleopPedro2 extends OpMode {
             robot.liftR.setPower(left2Y);
             robot.liftL.setPower(left2Y);
             // never set the hold target to a value below 0
-            liftLCounts = Math.max(robot.liftL.getCurrentPosition(), 0);
-            liftRCounts = Math.max(robot.liftR.getCurrentPosition(), 0);
+            liftLCounts = Math.max(robot.liftL.getCurrentPosition(), 10);
+            liftRCounts = Math.max(robot.liftR.getCurrentPosition(), 10);
             checkIntakeCollision();
         } else if (!autoLift && !recalLift) {
             robot.liftL.setTargetPosition(liftLCounts);

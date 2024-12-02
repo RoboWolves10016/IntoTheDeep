@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode.auton;
-
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -144,16 +144,14 @@ public class CompetitionAutonRight extends OpMode {
                 break;
             case 16:
                 robot.clawOpen();
-                if (pausetime.seconds() > 0.05) {
+                if (pausetime.seconds() > 0.5) {
                     pathState = 18;
                 }
                 break;
 ////////////////////// 1st sample hooked
             case 18: // move back behind the colored samples
-                if (pausetime.seconds() > 0.5) {
-                    follower.followPath(move2);
-                    pathState = 20;
-                }
+                follower.followPath(move2);
+                pathState = 20;
                 break;
             case 20:
                 follower.update();

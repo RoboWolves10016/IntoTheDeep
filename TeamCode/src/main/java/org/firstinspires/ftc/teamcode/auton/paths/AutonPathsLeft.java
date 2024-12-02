@@ -12,6 +12,9 @@ public class AutonPathsLeft {
     /* Declare OpMode members. */
     private OpMode myOpMode = null;   // gain access to methods in the calling OpMode.
 
+
+
+
     public static Path movepl;
     public static Path movepr;
     public static Path move1, move1b, move1c;
@@ -24,7 +27,9 @@ public class AutonPathsLeft {
     public static Path move6, move6a;
     public static Path move7;
     public static Path move8;
-    public static Path move12, move12b, move22a;
+    public static Path move9, move10, move11;
+
+
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public AutonPathsLeft(OpMode opmode) {
@@ -76,8 +81,8 @@ public class AutonPathsLeft {
 
         // to 1st neutral specimen/spike
         move2b = new Path(new BezierCurve(
-             new Point(30, 87, Point.CARTESIAN),
-             new Point(38,109, Point.CARTESIAN)));
+                new Point(30, 87, Point.CARTESIAN),
+                new Point(38,109, Point.CARTESIAN)));
         move2b.setConstantHeadingInterpolation(Math.toRadians(68));
 
         move2c = new Path(new BezierCurve(
@@ -140,9 +145,24 @@ public class AutonPathsLeft {
         move7.setConstantHeadingInterpolation(Math.toRadians(-45));// to basket
 
         // to park
-        move8 = new Path(new BezierLine(
+        move11 = new Path(new BezierLine(
                 new Point(15,130, Point.CARTESIAN),
                 new Point(19,126, Point.CARTESIAN)));
-        move8.setConstantHeadingInterpolation(Math.toRadians(0));  // to park
+        move11.setConstantHeadingInterpolation(Math.toRadians(0));  // to park
+
+        move9 = new Path(new BezierLine(
+                new Point(15,130, Point.CARTESIAN),
+                new Point(9, 44, Point.CARTESIAN)));
+        move9.setConstantHeadingInterpolation(Math.toRadians(-90));  // t
+        move10 = new Path(new BezierLine(
+                new Point(9,44, Point.CARTESIAN),
+                new Point(15, 130, Point.CARTESIAN)));
+        move10.setConstantHeadingInterpolation(Math.toRadians(-75));  //
+        // to park
+        move11 = new Path(new BezierLine(
+                new Point(15,130, Point.CARTESIAN),
+                new Point(19,126, Point.CARTESIAN)));
+        move11.setConstantHeadingInterpolation(Math.toRadians(0));  // to park
+
     }
 }
